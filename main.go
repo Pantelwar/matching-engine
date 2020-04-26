@@ -1,0 +1,196 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"time"
+
+	"github.com/Shopify/sarama"
+	cluster "github.com/bsm/sarama-cluster"
+	"github.com/gandharv-pantelwar/matching-engine/engine"
+)
+
+func main() {
+
+	// create the consumer and listen for new order messages
+	consumer := createConsumer()
+
+	// create the producer of trade messages
+	// producer := createProducer()
+
+	// create the order book
+	book := engine.OrderBook{
+		BuyOrders:  make([]engine.Order, 0, 100),
+		SellOrders: make([]engine.Order, 0, 100),
+	}
+
+	// book.SellOrders = append(book.SellOrders, engine.Order{ID: "124", Price: 50, Amount: 1, Type: "sell"})
+	// book.SellOrders = append(book.SellOrders, engine.Order{ID: "124", Price: 50, Amount: 1, Type: "sell"})
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+
+	// create a signal channel to know when we are done
+	done := make(chan bool)
+
+	// start processing orders
+	go func() {
+		for {
+			fmt.Println("\nRunnning")
+			select {
+			// case err := <-consumer.Errors():
+			// 	fmt.Println(err)
+			case msg := <-consumer.Messages():
+				// msgCount++
+				fmt.Println("Received messages", string(msg.Key), string(msg.Value))
+
+				var order engine.Order
+				// decode the message
+				order.FromJSON(msg.Value)
+				fmt.Printf("msg %#v\n", order)
+
+				// process the order
+				trades := book.Process(order)
+				fmt.Printf("Trades %#v\n", trades)
+				// fmt.Printf("BuyOrders: %#v length: %d\n", book.BuyOrders, len(book.BuyOrders))
+				// fmt.Printf("SellOrders: %#v length: %d\n", book.SellOrders, len(book.SellOrders))
+
+				printArray := []string{}
+				if len(book.BuyOrders) < len(book.SellOrders) && order.Type == "sell" {
+					for _, order := range book.SellOrders {
+						printArray = append(printArray, " | "+fmt.Sprintf("%f- %f", order.Amount, order.Price))
+					}
+
+					for i, order := range book.BuyOrders {
+						printArray[i] = fmt.Sprintf("\n%f - %f", order.Amount, order.Price) + printArray[i]
+					}
+
+				} else if len(book.BuyOrders) > len(book.SellOrders) && order.Type == "buy" {
+					for _, order := range book.BuyOrders {
+						printArray = append(printArray, fmt.Sprintf("\n%f - %f", order.Amount, order.Price))
+					}
+
+					for i, order := range book.SellOrders {
+						printArray[i] += " | " + fmt.Sprintf("%f- %f", order.Amount, order.Price)
+					}
+				}
+
+				for _, order := range printArray {
+					fmt.Printf("%s\n", order)
+				}
+
+				// send trades to message queue
+				for _, trade := range trades {
+					rawTrade := trade.ToJSON()
+					fmt.Println("Raw Trade", string(rawTrade))
+					// producer.Input() <- &sarama.ProducerMessage{
+					// 	Topic: "trades",
+					// 	Value: sarama.ByteEncoder(rawTrade),
+					// }
+				}
+				consumer.MarkOffset(msg, "")
+			case <-signals:
+				fmt.Println("Interrupt is detected")
+				done <- true
+			}
+		}
+
+		// fmt.Println("Start consuming Kafka messages")
+		// for msg := range consumer.Messages() {
+		// 	// var order engine.Order
+		// 	fmt.Println("MSG", msg)
+		// 	// decode the message
+		// 	// order.FromJSON(msg.Value)
+		// 	// // process the order
+		// 	// trades := book.Process(order)
+		// 	// // send trades to message queue
+		// 	// for _, trade := range trades {
+		// 	// 	rawTrade := trade.ToJSON()
+		// 	// 	producer.Input() <- &sarama.ProducerMessage{
+		// 	// 		Topic: "trades",
+		// 	// 		Value: sarama.ByteEncoder(rawTrade),
+		// 	// 	}
+		// 	// }
+		// 	// // mark the message as processed
+		// 	// // consumer.MarkOffset(msg, "")
+		// }
+		// done <- true
+	}()
+
+	// wait until we are done
+	<-done
+
+	fmt.Println("Complete")
+}
+
+//
+// Create the consumer
+//
+
+func createConsumer() *cluster.Consumer { //sarama.PartitionConsumer {
+	// define our configuration to the cluster
+	config := cluster.NewConfig()
+	config.Consumer.Return.Errors = false
+	config.Group.Return.Notifications = false
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	config.Consumer.Offsets.CommitInterval = 1 * time.Second
+
+	// create the consumer
+	consumer, err := cluster.NewConsumer([]string{"localhost:9092"}, "myconsumer", []string{"test"}, config)
+	if err != nil {
+		log.Fatal("Unable to connect consumer to kafka cluster")
+	}
+
+	// // Create new consumer
+	// master, err := sarama.NewConsumer([]string{"localhost:9092"}, config)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// // defer func() {
+	// // 	if err := master.Close(); err != nil {
+	// // 		panic(err)
+	// // 	}
+	// // }()
+
+	// topic := "test"
+	// // How to decide partition, is it fixed value...?
+	// consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	go handleErrors(consumer)
+	go handleNotifications(consumer)
+	return consumer
+}
+
+func handleErrors(consumer *cluster.Consumer) {
+	for err := range consumer.Errors() {
+		log.Printf("Error: %s\n", err.Error())
+	}
+}
+
+func handleNotifications(consumer *cluster.Consumer) {
+	for ntf := range consumer.Notifications() {
+		log.Printf("Rebalanced: %+v\n", ntf)
+	}
+}
+
+//
+// Create the producer
+//
+
+func createProducer() sarama.AsyncProducer {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = false
+	config.Producer.Return.Errors = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	producer, err := sarama.NewAsyncProducer([]string{"127.0.0.1:9092"}, config)
+	if err != nil {
+		log.Fatal("Unable to connect producer to kafka server")
+	}
+	return producer
+}
