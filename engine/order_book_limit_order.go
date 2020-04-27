@@ -22,7 +22,7 @@ func (book *OrderBook) processLimitBuy(order Order) []Trade {
 	if n != 0 && book.SellOrders[0].Price <= order.Price {
 		// traverse all orders that match
 		sellOrder := book.SellOrders[0]
-		fmt.Printf("buyOrder.Price: %f, order.Price: %f\n", sellOrder.Price, order.Price)
+		fmt.Printf("sellOrder.Price: %f, order.Price: %f\n", sellOrder.Price, order.Price)
 
 		for sellOrder.Price <= order.Price {
 		// for i := n - 1; i >= 0; i-- {

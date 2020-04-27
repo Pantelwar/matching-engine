@@ -18,7 +18,7 @@ func main() {
 	consumer := createConsumer()
 
 	// create the producer of trade messages
-	// producer := createProducer()
+	producer := createProducer()
 
 	// create the order book
 	book := engine.OrderBook{
@@ -40,27 +40,30 @@ func main() {
 		for {
 			fmt.Println("\nRunnning")
 			select {
-			// case err := <-consumer.Errors():
-			// 	fmt.Println(err)
+			case err := <-consumer.Errors():
+				fmt.Println("consumer.Errors()", err)
 			case msg := <-consumer.Messages():
 				// msgCount++
-				fmt.Println("Received messages", string(msg.Key), string(msg.Value))
+				fmt.Println("Receiveing message", string(msg.Key), string(msg.Value))
 
 				var order engine.Order
 				// decode the message
-				order.FromJSON(msg.Value)
-				fmt.Printf("msg %#v\n", order)
+				err := order.FromJSON(msg.Value)
+				if err != nil {
+					consumer.MarkOffset(msg, "")
+					fmt.Println("JSON Parse Error =: ", err)
+					continue
+				}
+				fmt.Printf("msg %#v %#v\n", order, err)
 
 				// process the order
 				trades := book.Process(order)
 				fmt.Printf("Trades %#v\n", trades)
-				// fmt.Printf("BuyOrders: %#v length: %d\n", book.BuyOrders, len(book.BuyOrders))
-				// fmt.Printf("SellOrders: %#v length: %d\n", book.SellOrders, len(book.SellOrders))
 
 				printArray := []string{}
 				if len(book.BuyOrders) <= len(book.SellOrders) && order.Type == "sell" {
 					for _, order := range book.SellOrders {
-						printArray = append(printArray, " | "+fmt.Sprintf("%f- %f", order.Price, order.Amount))
+						printArray = append(printArray, " | "+fmt.Sprintf("%f - %f", order.Price, order.Amount))
 					}
 
 					for i, order := range book.BuyOrders {
@@ -73,7 +76,7 @@ func main() {
 					}
 
 					for i, order := range book.SellOrders {
-						printArray[i] += " | " + fmt.Sprintf("%f- %f", order.Price, order.Amount)
+						printArray[i] += " | " + fmt.Sprintf("%f - %f", order.Price, order.Amount)
 					}
 				}
 
@@ -85,10 +88,10 @@ func main() {
 				for _, trade := range trades {
 					rawTrade := trade.ToJSON()
 					fmt.Println("Raw Trade", string(rawTrade))
-					// producer.Input() <- &sarama.ProducerMessage{
-					// 	Topic: "trades",
-					// 	Value: sarama.ByteEncoder(rawTrade),
-					// }
+					producer.Input() <- &sarama.ProducerMessage{
+						Topic: "trades",
+						Value: sarama.ByteEncoder(rawTrade),
+					}
 				}
 				consumer.MarkOffset(msg, "")
 			case <-signals:
@@ -96,27 +99,6 @@ func main() {
 				done <- true
 			}
 		}
-
-		// fmt.Println("Start consuming Kafka messages")
-		// for msg := range consumer.Messages() {
-		// 	// var order engine.Order
-		// 	fmt.Println("MSG", msg)
-		// 	// decode the message
-		// 	// order.FromJSON(msg.Value)
-		// 	// // process the order
-		// 	// trades := book.Process(order)
-		// 	// // send trades to message queue
-		// 	// for _, trade := range trades {
-		// 	// 	rawTrade := trade.ToJSON()
-		// 	// 	producer.Input() <- &sarama.ProducerMessage{
-		// 	// 		Topic: "trades",
-		// 	// 		Value: sarama.ByteEncoder(rawTrade),
-		// 	// 	}
-		// 	// }
-		// 	// // mark the message as processed
-		// 	// // consumer.MarkOffset(msg, "")
-		// }
-		// done <- true
 	}()
 
 	// wait until we are done
@@ -132,7 +114,7 @@ func main() {
 func createConsumer() *cluster.Consumer { //sarama.PartitionConsumer {
 	// define our configuration to the cluster
 	config := cluster.NewConfig()
-	config.Consumer.Return.Errors = false
+	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Offsets.CommitInterval = 1 * time.Second
