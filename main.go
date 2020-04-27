@@ -58,22 +58,22 @@ func main() {
 				// fmt.Printf("SellOrders: %#v length: %d\n", book.SellOrders, len(book.SellOrders))
 
 				printArray := []string{}
-				if len(book.BuyOrders) < len(book.SellOrders) && order.Type == "sell" {
+				if len(book.BuyOrders) <= len(book.SellOrders) && order.Type == "sell" {
 					for _, order := range book.SellOrders {
-						printArray = append(printArray, " | "+fmt.Sprintf("%f- %f", order.Amount, order.Price))
+						printArray = append(printArray, " | "+fmt.Sprintf("%f- %f", order.Price, order.Amount))
 					}
 
 					for i, order := range book.BuyOrders {
 						printArray[i] = fmt.Sprintf("\n%f - %f", order.Amount, order.Price) + printArray[i]
 					}
 
-				} else if len(book.BuyOrders) > len(book.SellOrders) && order.Type == "buy" {
+				} else if len(book.BuyOrders) >= len(book.SellOrders) && order.Type == "buy" {
 					for _, order := range book.BuyOrders {
 						printArray = append(printArray, fmt.Sprintf("\n%f - %f", order.Amount, order.Price))
 					}
 
 					for i, order := range book.SellOrders {
-						printArray[i] += " | " + fmt.Sprintf("%f- %f", order.Amount, order.Price)
+						printArray[i] += " | " + fmt.Sprintf("%f- %f", order.Price, order.Amount)
 					}
 				}
 

@@ -1,5 +1,7 @@
 package engine
 
+import "fmt"
+
 // import "fmt"
 
 // Process an order and return the trades generated before adding the remaining amount to the market
@@ -17,10 +19,14 @@ func (book *OrderBook) processLimitBuy(order Order) []Trade {
 	// fmt.Println("len(book.SellOrders)", n)
 	// fmt.Println("len(book.BuyOrders)", len(book.BuyOrders))
 	// check if we have at least one matching order
-	if n != 0 && book.SellOrders[n-1].Price <= order.Price {
+	if n != 0 && book.SellOrders[0].Price <= order.Price {
 		// traverse all orders that match
-		for i := n - 1; i >= 0; i-- {
-			sellOrder := book.SellOrders[i]
+		sellOrder := book.SellOrders[0]
+		fmt.Printf("buyOrder.Price: %f, order.Price: %f\n", sellOrder.Price, order.Price)
+
+		for sellOrder.Price <= order.Price {
+		// for i := n - 1; i >= 0; i-- {
+			sellOrder = book.SellOrders[0]
 			if sellOrder.Price > order.Price {
 				break
 			}
@@ -29,7 +35,7 @@ func (book *OrderBook) processLimitBuy(order Order) []Trade {
 				trades = append(trades, Trade{order.ID, sellOrder.ID, order.Amount, sellOrder.Price})
 				sellOrder.Amount -= order.Amount
 				if sellOrder.Amount == 0 {
-					book.removeSellOrder(i)
+					book.removeSellOrder(0)
 				}
 				return trades
 			}
@@ -37,7 +43,7 @@ func (book *OrderBook) processLimitBuy(order Order) []Trade {
 			if sellOrder.Amount < order.Amount {
 				trades = append(trades, Trade{order.ID, sellOrder.ID, sellOrder.Amount, sellOrder.Price})
 				order.Amount -= sellOrder.Amount
-				book.removeSellOrder(i)
+				book.removeSellOrder(0)
 				continue
 			}
 		}
@@ -54,10 +60,17 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 	// fmt.Println("len(book.SellOrders)", len(book.SellOrders))
 	// fmt.Println("len(book.BuyOrders)", n)
 	// check if we have at least one matching order
-	if n != 0 && book.BuyOrders[n-1].Price >= order.Price {
+	fmt.Printf("book.BuyOrders[0].Price: %f, order.Price: %f\n", book.BuyOrders[0].Price, order.Price)
+
+	if n != 0 && book.BuyOrders[0].Price >= order.Price {
 		// traverse all orders that match
-		for i := n - 1; i >= 0; i-- {
-			buyOrder := book.BuyOrders[i]
+		buyOrder := book.BuyOrders[0]
+		fmt.Printf("buyOrder.Price: %f, order.Price: %f\n", buyOrder.Price, order.Price)
+
+		for buyOrder.Price >= order.Price {
+		// for i := 0; i <= n-1; i++ {
+			buyOrder = book.BuyOrders[0]
+			fmt.Printf("%#v\n", buyOrder)
 			if buyOrder.Price < order.Price {
 				break
 			}
@@ -66,7 +79,7 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 				trades = append(trades, Trade{order.ID, buyOrder.ID, order.Amount, buyOrder.Price})
 				buyOrder.Amount -= order.Amount
 				if buyOrder.Amount == 0 {
-					book.removeBuyOrder(i)
+					book.removeBuyOrder(0)
 				}
 				return trades
 			}
@@ -74,7 +87,7 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 			if buyOrder.Amount < order.Amount {
 				trades = append(trades, Trade{order.ID, buyOrder.ID, buyOrder.Amount, buyOrder.Price})
 				order.Amount -= buyOrder.Amount
-				book.removeBuyOrder(i)
+				book.removeBuyOrder(0)
 				continue
 			}
 		}
