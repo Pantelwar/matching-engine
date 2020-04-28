@@ -8,6 +8,14 @@ type OrderBook struct {
 	SellOrders []Order
 }
 
+// NewOrderBook Returns new order book
+func NewOrderBook() *OrderBook {
+	return &OrderBook{
+		BuyOrders:  make([]Order, 0, 100),
+		SellOrders: make([]Order, 0, 100),
+	}
+}
+
 // Add a buy order to the order book
 func (book *OrderBook) addBuyOrder(order Order) {
 	n := len(book.BuyOrders)

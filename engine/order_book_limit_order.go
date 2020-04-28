@@ -16,21 +16,22 @@ func (book *OrderBook) Process(order Order) []Trade {
 func (book *OrderBook) processLimitBuy(order Order) []Trade {
 	trades := make([]Trade, 0, 1)
 	n := len(book.SellOrders)
-	// fmt.Println("len(book.SellOrders)", n)
-	// fmt.Println("len(book.BuyOrders)", len(book.BuyOrders))
+	
 	// check if we have at least one matching order
 	if n != 0 && book.SellOrders[0].Price <= order.Price {
 		// traverse all orders that match
-		sellOrder := book.SellOrders[0]
-		fmt.Printf("sellOrder.Price: %f, order.Price: %f\n", sellOrder.Price, order.Price)
+		sellOrder := &book.SellOrders[0]
+		// fmt.Printf("sellOrder.Price: %f, order.Price: %f\n", sellOrder.Price, order.Price)
 
 		for sellOrder.Price <= order.Price {
-		// for i := n - 1; i >= 0; i-- {
-			sellOrder = book.SellOrders[0]
+			sellOrder = &book.SellOrders[0]
+			fmt.Printf("%#v\n", sellOrder)
+			fmt.Printf("sellOrder.Price: %f, order.Price: %f\n", sellOrder.Price, order.Price)
 			if sellOrder.Price > order.Price {
 				break
 			}
 			// fill the entire order
+			fmt.Printf("sellOrder.Amount: %f, order.Amount: %f\n", sellOrder.Amount, order.Amount)
 			if sellOrder.Amount >= order.Amount {
 				trades = append(trades, Trade{order.ID, sellOrder.ID, order.Amount, sellOrder.Price})
 				sellOrder.Amount -= order.Amount
@@ -57,19 +58,17 @@ func (book *OrderBook) processLimitBuy(order Order) []Trade {
 func (book *OrderBook) processLimitSell(order Order) []Trade {
 	trades := make([]Trade, 0, 1)
 	n := len(book.BuyOrders)
-	// fmt.Println("len(book.SellOrders)", len(book.SellOrders))
-	// fmt.Println("len(book.BuyOrders)", n)
+	
 	// check if we have at least one matching order
 	fmt.Printf("book.BuyOrders[0].Price: %f, order.Price: %f\n", book.BuyOrders[0].Price, order.Price)
 
 	if n != 0 && book.BuyOrders[0].Price >= order.Price {
 		// traverse all orders that match
-		buyOrder := book.BuyOrders[0]
+		buyOrder := &book.BuyOrders[0]
 		fmt.Printf("buyOrder.Price: %f, order.Price: %f\n", buyOrder.Price, order.Price)
 
 		for buyOrder.Price >= order.Price {
-		// for i := 0; i <= n-1; i++ {
-			buyOrder = book.BuyOrders[0]
+			buyOrder = &book.BuyOrders[0]
 			fmt.Printf("%#v\n", buyOrder)
 			if buyOrder.Price < order.Price {
 				break

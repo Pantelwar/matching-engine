@@ -21,13 +21,7 @@ func main() {
 	producer := createProducer()
 
 	// create the order book
-	book := engine.OrderBook{
-		BuyOrders:  make([]engine.Order, 0, 100),
-		SellOrders: make([]engine.Order, 0, 100),
-	}
-
-	// book.SellOrders = append(book.SellOrders, engine.Order{ID: "124", Price: 50, Amount: 1, Type: "sell"})
-	// book.SellOrders = append(book.SellOrders, engine.Order{ID: "124", Price: 50, Amount: 1, Type: "sell"})
+	book := engine.NewOrderBook()
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
@@ -42,9 +36,11 @@ func main() {
 			select {
 			case err := <-consumer.Errors():
 				fmt.Println("consumer.Errors()", err)
+			case ntf := <-consumer.Notifications():
+				fmt.Printf("Rebalanced: %+v\n", ntf)
 			case msg := <-consumer.Messages():
 				// msgCount++
-				fmt.Println("Receiveing message", string(msg.Key), string(msg.Value))
+				fmt.Printf("Receiveing message => Key: %s, Value: %s\n", string(msg.Key), string(msg.Value))
 
 				var order engine.Order
 				// decode the message
@@ -115,7 +111,7 @@ func createConsumer() *cluster.Consumer { //sarama.PartitionConsumer {
 	// define our configuration to the cluster
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
-	config.Group.Return.Notifications = false
+	config.Group.Return.Notifications = true
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Offsets.CommitInterval = 1 * time.Second
 
@@ -125,41 +121,22 @@ func createConsumer() *cluster.Consumer { //sarama.PartitionConsumer {
 		log.Fatal("Unable to connect consumer to kafka cluster")
 	}
 
-	// // Create new consumer
-	// master, err := sarama.NewConsumer([]string{"localhost:9092"}, config)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// // defer func() {
-	// // 	if err := master.Close(); err != nil {
-	// // 		panic(err)
-	// // 	}
-	// // }()
-
-	// topic := "test"
-	// // How to decide partition, is it fixed value...?
-	// consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	go handleErrors(consumer)
-	go handleNotifications(consumer)
+	// go handleErrors(consumer)
+	// go handleNotifications(consumer)
 	return consumer
 }
 
-func handleErrors(consumer *cluster.Consumer) {
-	for err := range consumer.Errors() {
-		log.Printf("Error: %s\n", err.Error())
-	}
-}
+// func handleErrors(consumer *cluster.Consumer) {
+// 	for err := range consumer.Errors() {
+// 		log.Printf("Error: %s\n", err.Error())
+// 	}
+// }
 
-func handleNotifications(consumer *cluster.Consumer) {
-	for ntf := range consumer.Notifications() {
-		log.Printf("Rebalanced: %+v\n", ntf)
-	}
-}
+// func handleNotifications(consumer *cluster.Consumer) {
+// 	for ntf := range consumer.Notifications() {
+// 		log.Printf("Rebalanced: %+v\n", ntf)
+// 	}
+// }
 
 //
 // Create the producer
