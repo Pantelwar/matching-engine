@@ -12,23 +12,18 @@ import (
 type BinaryNode struct {
 	Left   *BinaryNode
 	Right  *BinaryNode
-	Key    float64
-	Data   interface{}
 	Price  float64
 	Amount float64
 	ID     string
 }
 
 // NewBinaryNode ...
-func NewBinaryNode(key float64, data interface{}) *BinaryNode { //price float64, amount float64) *BinaryNode {
-	return &BinaryNode{Key: key, Data: data, Left: nil, Right: nil}
-
-	// return &BinaryNode{Price: price, Amount: amount, Left: nil, Right: nil}
+func NewBinaryNode(price float64, amount float64) *BinaryNode {
+	return &BinaryNode{Price: price, Amount: amount, Left: nil, Right: nil}
 }
 
 // Insert ...
-func (n *BinaryNode) Insert(key float64, data interface{}) { //price float64, amount float64) {
-
+func (n *BinaryNode) Insert(price float64, amount float64) {
 	if n == nil {
 		return
 	} else if price < n.Price {
@@ -49,26 +44,6 @@ func (n *BinaryNode) Insert(key float64, data interface{}) { //price float64, am
 		// fmt.Println(" price = n.Price", price, n.Price)
 
 	}
-	// if n == nil {
-	// 	return
-	// } else if price < n.Price {
-	// 	// fmt.Println(" price < n.Price", price, n.Price)
-	// 	if n.Left == nil {
-	// 		n.Left = NewBinaryNode(price, amount)
-	// 	} else {
-	// 		n.Left.Insert(price, amount)
-	// 	}
-	// } else if price > n.Price {
-	// 	// fmt.Println(" price > n.Price", price, n.Price)
-	// 	if n.Right == nil {
-	// 		n.Right = NewBinaryNode(price, amount)
-	// 	} else {
-	// 		n.Right.Insert(price, amount)
-	// 	}
-	// } else {
-	// 	// fmt.Println(" price = n.Price", price, n.Price)
-
-	// }
 }
 
 func (n *BinaryNode) Print(w io.Writer, ns int, ch rune) {
