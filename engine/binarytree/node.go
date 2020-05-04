@@ -1,7 +1,6 @@
 package binarytree
 
 import (
-	"errors"
 	"fmt"
 	"io"
 )
@@ -10,38 +9,37 @@ import (
 
 // BinaryNode ...
 type BinaryNode struct {
-	Left   *BinaryNode
-	Right  *BinaryNode
-	Price  float64
-	Amount float64
-	ID     string
+	Left  *BinaryNode
+	Right *BinaryNode
+	Key   float64
+	Data  interface{}
 }
 
 // NewBinaryNode ...
-func NewBinaryNode(price float64, amount float64) *BinaryNode {
-	return &BinaryNode{Price: price, Amount: amount, Left: nil, Right: nil}
+func NewBinaryNode(key float64, data interface{}) *BinaryNode {
+	return &BinaryNode{Key: key, Data: data, Left: nil, Right: nil}
 }
 
 // Insert ...
-func (n *BinaryNode) Insert(price float64, amount float64) {
+func (n *BinaryNode) Insert(key float64, data interface{}) {
 	if n == nil {
 		return
-	} else if price < n.Price {
-		// fmt.Println(" price < n.Price", price, n.Price)
+	} else if key < n.Key {
+		// fmt.Println(" key < n.Key", key, n.Key)
 		if n.Left == nil {
-			n.Left = NewBinaryNode(price, amount)
+			n.Left = NewBinaryNode(key, data)
 		} else {
-			n.Left.Insert(price, amount)
+			n.Left.Insert(key, data)
 		}
-	} else if price > n.Price {
-		// fmt.Println(" price > n.Price", price, n.Price)
+	} else if key > n.Key {
+		// fmt.Println(" key > n.Key", key, n.Key)
 		if n.Right == nil {
-			n.Right = NewBinaryNode(price, amount)
+			n.Right = NewBinaryNode(key, data)
 		} else {
-			n.Right.Insert(price, amount)
+			n.Right.Insert(key, data)
 		}
 	} else {
-		// fmt.Println(" price = n.Price", price, n.Price)
+		// fmt.Println(" key = n.Key", key, n.Key)
 
 	}
 }
@@ -54,7 +52,7 @@ func (n *BinaryNode) Print(w io.Writer, ns int, ch rune) {
 	for i := 0; i < ns; i++ {
 		fmt.Fprint(w, " ")
 	}
-	fmt.Fprintf(w, "%c:%v -> %f\n", ch, n.Price, n.Amount)
+	fmt.Fprintf(w, "%c:%v -> %f\n", ch, n.Key, n.Data)
 	n.Left.Print(w, ns+2, 'L')
 	n.Right.Print(w, ns+2, 'R')
 
@@ -66,23 +64,23 @@ func (n *BinaryNode) PreOrderTraverse(f func(float64)) {
 	if n != nil {
 		n.Left.PreOrderTraverse(f)
 		n.Right.PreOrderTraverse(f)
-		f(n.Price)
+		f(n.Key)
 	}
 }
 
-func (n *BinaryNode) Remove(price float64) *BinaryNode {
+func (n *BinaryNode) Remove(key float64) *BinaryNode {
 	if n == nil {
 		return nil
 	}
-	if price < n.Price {
-		n.Left = n.Left.Remove(price)
+	if key < n.Key {
+		n.Left = n.Left.Remove(key)
 		return n
 	}
-	if price > n.Price {
-		n.Right = n.Right.Remove(price)
+	if key > n.Key {
+		n.Right = n.Right.Remove(key)
 		return n
 	}
-	// price == n.Price
+	// key == n.Key
 	if n.Left == nil && n.Right == nil {
 		n = nil
 		return nil
@@ -104,28 +102,28 @@ func (n *BinaryNode) Remove(price float64) *BinaryNode {
 			break
 		}
 	}
-	n.Price, n.Amount = leftmostrightside.Price, leftmostrightside.Amount
-	n.Right = n.Right.Remove(n.Price)
+	n.Key, n.Data = leftmostrightside.Key, leftmostrightside.Data
+	n.Right = n.Right.Remove(n.Key)
 	return n
 }
 
-func (n *BinaryNode) SetAmount(amount float64) error {
-	if amount <= 0 {
-		return errors.New("Invalid Amount")
-	}
-	n.Amount = amount
+func (n *BinaryNode) SetData(data interface{}) error {
+	// if amount <= 0 {
+	// 	return errors.New("Invalid Amount")
+	// }
+	n.Data = data
 	return nil
 }
 
-func (n *BinaryNode) SearchSubTree(price float64) *BinaryNode {
+func (n *BinaryNode) SearchSubTree(key float64) *BinaryNode {
 	if n == nil {
 		return n
 	}
-	if price < n.Price {
-		return n.Left.SearchSubTree(price)
+	if key < n.Key {
+		return n.Left.SearchSubTree(key)
 	}
-	if price > n.Price {
-		return n.Right.SearchSubTree(price)
+	if key > n.Key {
+		return n.Right.SearchSubTree(key)
 	}
 	return n
 }

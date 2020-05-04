@@ -21,7 +21,7 @@ func print(w io.Writer, node *binarytree.BinaryNode, ns int, ch rune) {
 	for i := 0; i < ns; i++ {
 		fmt.Fprint(w, " ")
 	}
-	fmt.Fprintf(w, "%c:%v     ->    %v\n", ch, node.Price, node.Amount)
+	fmt.Fprintf(w, "%c:%v     ->    %v\n", ch, node.Key, node.Data)
 	print(w, node.Left, ns+2, 'L')
 	print(w, node.Right, ns+2, 'R')
 }
@@ -39,9 +39,9 @@ func main() {
 	// started := false
 	count := 0
 	sellPrice := 7000.0
-	sellAmount := 10.0
+	sellAmount := 0.0
 	go func() {
-		for i := 0.0; i < 5; i++ {
+		for i := 0.0; i < 50; i++ {
 			// rand.Seed(10)
 			var price float64
 			price = 7000.0 + math.Ceil(rand.Float64()*500) // (rand.Float64()*5)+7000
@@ -51,7 +51,7 @@ func main() {
 
 			orderType := "buy"
 			// fmt.Println("type:", orderType)
-			orderString := fmt.Sprintf("{\"id\":\"qwe\", \"type\": \"%s\", \"amount\":%f, \"price\":%f }", orderType, amount, price)
+			orderString := fmt.Sprintf("{\"id\":\"b%f\", \"type\": \"%s\", \"amount\":%f, \"price\":%f }", i, orderType, amount, price)
 
 			// fmt.Println("orderString:", orderString)
 			var order engine.Order
@@ -73,15 +73,15 @@ func main() {
 		elapsed := time.Since(startTime)
 		fmt.Println("Executionn started after:", elapsed, count)
 
-		// fmt.Println("old Book", sellAmount)
-		// book.Print()
+		fmt.Println("old Book", sellAmount)
+		book.Print()
 
 		count = 0
 		startTime = time.Now()
 		for i := 0; i < 1; i++ {
 			orderType := "sell"
 			// fmt.Println("type:", orderType)
-			orderString := fmt.Sprintf("{\"id\":\"qwe\", \"type\": \"%s\", \"amount\":%f, \"price\":%f }", orderType, sellAmount, sellPrice)
+			orderString := fmt.Sprintf("{\"id\":\"s%d\", \"type\": \"%s\", \"amount\":%f, \"price\":%f }", i, orderType, sellAmount, sellPrice)
 
 			// fmt.Println("orderString:", orderString)
 			var order engine.Order
@@ -99,10 +99,10 @@ func main() {
 			// fmt.Printf("msg %#v %#v\n", order, err)
 
 			// process the order
-			book.Process(order)
+			trades := book.Process(order)
 			count += 1
 			// fmt.Printf("Trades %#v\n", trades)
-			// fmt.Printf("Trades %d\n", len(trades))
+			fmt.Printf("Trades %d\n", len(trades))
 
 			// go printOrders(book, &order)
 		}

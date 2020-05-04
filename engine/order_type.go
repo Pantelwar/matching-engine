@@ -13,3 +13,9 @@ func NewOrderType(orderSide string) *OrderType {
 	bTree := binarytree.NewBinaryTree()
 	return &OrderType{Tree: bTree, Type: orderSide}
 }
+
+func (ot *OrderType) AddOrderInQueue(order Order) error {
+	arr := []*Order{&order}
+	ot.Tree.Insert(order.Price, arr)
+	return nil
+}
