@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"matching-engine/engine/binarytree"
+	"github.com/Pantelwar/binarytree"
 )
 
 type OrderType struct {
@@ -15,7 +15,10 @@ func NewOrderType(orderSide string) *OrderType {
 }
 
 func (ot *OrderType) AddOrderInQueue(order Order) error {
-	arr := []*Order{&order}
-	ot.Tree.Insert(order.Price, arr)
+	// arr := []*Order{&order}
+	orderNode := NewOrderNode()
+	orderNode.Orders = append(orderNode.Orders, &order)
+	orderNode.Volume = order.Amount
+	ot.Tree.Insert(order.Price, orderNode)
 	return nil
 }

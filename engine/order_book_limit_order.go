@@ -1,5 +1,7 @@
 package engine
 
+import "fmt"
+
 // import "fmt"
 
 // Process an order and return the trades generated before adding the remaining amount to the market
@@ -22,7 +24,6 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 	trades := make([]Trade, 0, 1)
 
 	maxNode := book.BuyOrders.Tree.Max()
-	// nodeData := maxNode.Data.([]*Order)
 	countAdd := 0.0
 	for maxNode == nil || order.Amount > 0 {
 		maxNode = book.BuyOrders.Tree.Max()
@@ -30,15 +31,19 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 			book.addSellOrder(order)
 			break
 		}
-		nodeData := maxNode.Data.([]*Order)
+		nodeData := maxNode.Data.(*OrderNode) //([]*Order)
+		nodeOrders := nodeData.Orders         //([]*Order)
 		countMatch := 0
-		for _, ele := range nodeData {
+		for _, ele := range nodeOrders {
 			countAdd += ele.Amount
 			// fmt.Println(order.Price, "AMOUNT", order.Amount, ele, ele.Amount > order.Amount)
 			if ele.Amount > order.Amount {
+				nodeData.UpdateVolume(-order.Amount)
+
 				amount := ele.Amount - order.Amount
 				// amount = math.Floor(amount*100000000) / 100000000
 				ele.Amount = amount
+
 				maxNode.SetData(nodeData)
 
 				trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
@@ -48,7 +53,8 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 				break
 			}
 			if ele.Amount == order.Amount {
-				// fmt.Println("Removing Node")
+				nodeData.UpdateVolume(-order.Amount)
+
 				countMatch++
 				ele.Amount = 0
 				// node := book.removeBuyOrder(maxNode.Key)
@@ -61,6 +67,9 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 			} else {
 				// fmt.Println("Removing Node and continue")
 				countMatch++
+
+				nodeData.UpdateVolume(-ele.Amount)
+
 				order.Amount -= ele.Amount
 				ele.Amount = 0.0
 				// order.Amount = math.Floor(order.Amount*100000000) / 100000000
@@ -72,13 +81,13 @@ func (book *OrderBook) processLimitSell(order Order) []Trade {
 			}
 		}
 
-		if len(nodeData) == countMatch {
+		if len(nodeOrders) == countMatch {
 			node := book.removeBuyOrder(maxNode.Key)
 			book.BuyOrders.Tree.Root = node
 		}
 
-		// fmt.Println("countMatch", countMatch, nodeData[countMatch:])
-		nodeData = nodeData[countMatch:]
+		fmt.Println("countMatch", countMatch, nodeOrders[countMatch:])
+		nodeData.Orders = nodeOrders[countMatch:]
 		maxNode.SetData(nodeData)
 
 		// continue

@@ -3,8 +3,9 @@ package engine
 import (
 	"fmt"
 	"io"
-	"matching-engine/engine/binarytree"
 	"os"
+
+	"github.com/Pantelwar/binarytree"
 )
 
 // OrderBook type
@@ -26,9 +27,9 @@ func (book *OrderBook) addBuyOrder(order Order) {
 	node := book.BuyOrders.Tree.Root.SearchSubTree(order.Price)
 	if node != nil {
 		// order.Amount += node.Data.(Order).Amount
-		arr := append(node.Data.([]*Order), &order)
-		node.SetData(arr)
-		return
+		node.Data.(*OrderNode).UpdateVolume(order.Amount)
+		node.Data.(*OrderNode).AddOrder(order)
+		// return
 	}
 	book.BuyOrders.AddOrderInQueue(order)
 	// book.BuyOrders.Tree.Insert(order.Price, order)
@@ -38,8 +39,9 @@ func (book *OrderBook) addBuyOrder(order Order) {
 func (book *OrderBook) addSellOrder(order Order) {
 	node := book.SellOrders.Tree.Root.SearchSubTree(order.Price)
 	if node != nil {
-		arr := append(node.Data.([]*Order), &order)
-		node.SetData(arr)
+		node.Data.(*OrderNode).UpdateVolume(order.Amount)
+		node.Data.(*OrderNode).AddOrder(order)
+		// node.SetData(data)
 		return
 	}
 	book.SellOrders.AddOrderInQueue(order)
@@ -56,6 +58,7 @@ func (book *OrderBook) removeSellOrder(key float64) *binarytree.BinaryNode {
 	return book.SellOrders.Tree.Root.Remove(key)
 }
 
+// Print displays book
 func (book *OrderBook) Print() {
 	fmt.Println("BuyOrders: ")
 	print(os.Stdout, book.BuyOrders.Tree.Root, 0, 'M')
@@ -75,7 +78,7 @@ func print(w io.Writer, node *binarytree.BinaryNode, ns int, ch rune) {
 		fmt.Fprint(w, " ")
 	}
 	fmt.Fprintf(w, "%c:%v -> %#v\n", ch, node.Key, node.Data)
-	for _, val := range node.Data.([]*Order) {
+	for _, val := range node.Data.(*OrderNode).Orders {
 		for i := 0; i < ns; i++ {
 			fmt.Fprint(w, " ")
 		}
