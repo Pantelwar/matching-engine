@@ -29,7 +29,7 @@ func (book *OrderBook) addBuyOrder(order Order) {
 		// order.Amount += node.Data.(Order).Amount
 		node.Data.(*OrderNode).UpdateVolume(order.Amount)
 		node.Data.(*OrderNode).AddOrder(order)
-		// return
+		return
 	}
 	book.BuyOrders.AddOrderInQueue(order)
 	// book.BuyOrders.Tree.Insert(order.Price, order)
