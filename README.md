@@ -5,20 +5,19 @@ Improved matching engine written in Go (Golang)
 ## Features
 * Standard price-time priority
 * Supports limit orders
-* Supports order cancelling
 * High performance (above 500k trades per second)
 * Optimal memory usage
 
 ## Installation
 
-```markdown
+```javascript
 go get github.com/Pantelwar/matching-engine/engine
 ```
 
 ## Usage
 To start using order book you need to create object:
 
-```markdown
+```javascript
 import (
   "fmt" 
   ob "github.com/Pantelwar/matching-engine/engine"
@@ -32,14 +31,14 @@ func main() {
 
 Then you be able to use next primary functions:
 
-```markdown
+```javascript
 func (ob *OrderBook) Process(order Order, orderside string) []Trade {...}
 ```
 
 ## About primary functions
 #### Process
 
-```markdown
+```javascript
 // ProcessLimitOrder places new order to the OrderBook
 // Arguments:
 //      order   -   type Order struct {
