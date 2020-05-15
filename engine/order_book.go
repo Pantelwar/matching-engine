@@ -15,10 +15,15 @@ type OrderBook struct {
 }
 
 // NewOrderBook Returns new order book
-func NewOrderBook2() *OrderBook {
+func NewOrderBook() *OrderBook {
+	bTree := binarytree.NewBinaryTree()
+	sTree := binarytree.NewBinaryTree()
+	bTree.ToggleSplay(true)
+	sTree.ToggleSplay(true)
+
 	return &OrderBook{
-		BuyTree:         binarytree.NewBinaryTree(),
-		SellTree:        binarytree.NewBinaryTree(),
+		BuyTree:         bTree,
+		SellTree:        sTree,
 		OrderLimitRange: 100,
 	}
 }

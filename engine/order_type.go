@@ -13,6 +13,7 @@ type OrderType struct {
 // NewOrderType returns OrderType struct
 func NewOrderType(orderSide string) *OrderType {
 	bTree := binarytree.NewBinaryTree()
+	bTree.ToggleSplay(true)
 	return &OrderType{Tree: bTree, Type: orderSide}
 }
 
