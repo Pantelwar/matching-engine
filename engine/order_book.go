@@ -11,7 +11,7 @@ import (
 type OrderBook struct {
 	BuyTree         *binarytree.BinaryTree
 	SellTree        *binarytree.BinaryTree
-	OrderLimitRange int
+	orderLimitRange int
 }
 
 // NewOrderBook Returns new order book
@@ -24,7 +24,7 @@ func NewOrderBook() *OrderBook {
 	return &OrderBook{
 		BuyTree:         bTree,
 		SellTree:        sTree,
-		OrderLimitRange: 100,
+		orderLimitRange: 100,
 	}
 }
 
@@ -38,8 +38,8 @@ func (ob *OrderBook) Process(order Order, orderside string) []Trade {
 
 // addBuyOrder a buy order to the order book
 func (ob *OrderBook) addBuyOrder(order Order) {
-	startPoint := float64(int(math.Ceil(order.Price)) / ob.OrderLimitRange * ob.OrderLimitRange)
-	endPoint := startPoint + float64(ob.OrderLimitRange)
+	startPoint := float64(int(math.Ceil(order.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
 	node := ob.BuyTree.Root.SearchSubTree(searchNodePrice)
@@ -67,8 +67,8 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 
 // addSellOrder a buy order to the order book
 func (ob *OrderBook) addSellOrder(order Order) {
-	startPoint := float64(int(math.Ceil(order.Price)) / ob.OrderLimitRange * ob.OrderLimitRange)
-	endPoint := startPoint + float64(ob.OrderLimitRange)
+	startPoint := float64(int(math.Ceil(order.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
 	node := ob.SellTree.Root.SearchSubTree(searchNodePrice)
