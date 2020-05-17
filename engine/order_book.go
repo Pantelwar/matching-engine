@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 	"math"
-
+	"encoding/json"
 	"github.com/Pantelwar/binarytree"
 )
 
@@ -13,6 +13,73 @@ type OrderBook struct {
 	SellTree        *binarytree.BinaryTree
 	orderLimitRange int
 }
+
+type ResultBook struct {
+	Buys []book `json:"buys"`
+	Sells []book `json:"sells"`
+}
+
+type book struct {
+	Price float64 `json:"price"`
+	Amount float64 `json:"amount"`
+}
+
+// MarshalJSON implements interface for json unmarshal
+func (ob *OrderBook) MarshalJSON() ([]byte, error) {
+	buys:= []book{}
+	// var orderSideBuy []string
+	ob.BuyTree.Root.InOrderTraverse(func(i float64) {
+		// result = append(result, fmt.Sprintf("%#v", i))
+		// fmt.Println("Key", i)
+		node := ob.BuyTree.Root.SearchSubTree(i)
+		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
+			// result = append(result, fmt.Sprintf("%#v", i))
+			// fmt.Println("    value", i)
+			var b book
+			// res := fmt.Sprintf("%#f -> ", i)
+			b.Price = i
+			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
+			// fmt.Printf("subnode: %#v\n", subNode)
+			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
+			// res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
+			b.Amount = subNode.Data.(*OrderNode).Volume
+			// fmt.Println("res b", res)
+			// orderSideBuy = append(orderSideBuy, res)
+			buys = append(buys, b)
+		})
+	})
+
+	sells:= []book{}
+	ob.SellTree.Root.InOrderTraverse(func(i float64) {
+		// result = append(result, fmt.Sprintf("%#v", i))
+		// fmt.Println("Key lol", i)
+		node := ob.SellTree.Root.SearchSubTree(i)
+		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
+			// result = append(result, fmt.Sprintf("%#v", i))
+			// fmt.Println("    value", i)
+			var b book
+			// res := fmt.Sprintf("%#f -> ", i)
+			b.Price = i
+			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
+			// fmt.Printf("subnode: %#v\n", subNode)
+			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
+			// res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
+			// fmt.Println("res", res)
+			b.Amount = subNode.Data.(*OrderNode).Volume
+			// fmt.Println("res b", res)
+			// orderSideBuy = append(orderSideBuy, res)
+			buys = append(sells, b)
+				})
+	})
+
+	return json.Marshal(
+		&ResultBook{
+			Buys: buys,
+			Sells: sells,
+		},
+	)
+}
+
 
 // NewOrderBook Returns new order book
 func NewOrderBook() *OrderBook {
@@ -29,8 +96,8 @@ func NewOrderBook() *OrderBook {
 }
 
 // Process executes limit process
-func (ob *OrderBook) Process(order Order, orderside string) []Trade {
-	if orderside == "buy" {
+func (ob *OrderBook) Process(order Order) ([]Trade, string) {
+	if order.Type == Buy {
 		return ob.processOrderB(order)
 	}
 	return ob.processOrderS(order)
@@ -95,13 +162,15 @@ func (ob *OrderBook) addSellOrder(order Order) {
 }
 
 // processOrderS a limit sell order
-func (ob *OrderBook) processOrderS(order Order) []Trade {
+func (ob *OrderBook) processOrderS(order Order) ([]Trade, string) {
 	trades := make([]Trade, 0, 1)
 	maxNode := ob.BuyTree.Max()
 	if maxNode == nil {
 		// fmt.Println("adding sellnode")
 		ob.addSellOrder(order)
-		return trades
+		b, _ := json.Marshal(ob)
+			
+		return trades, string(b)
 	}
 	// fmt.Println("processing sell node", maxNode.Key)
 	// fmt.Printf("processing sell node: %#v\n", maxNode)
@@ -134,7 +203,9 @@ func (ob *OrderBook) processOrderS(order Order) []Trade {
 		if order.Price > maxNode.Key {
 			// fmt.Println("adding sellnode directly")
 			ob.addSellOrder(order)
-			return trades
+			b, _ := json.Marshal(ob)
+			
+			return trades, string(b)
 		}
 		// fmt.Println()
 		// fmt.Println("Execution processLimitSell")
@@ -155,7 +226,9 @@ func (ob *OrderBook) processOrderS(order Order) []Trade {
 		// print(os.Stdout, ob.BuyTree.Root, 0, 'M')
 
 	}
-	return trades
+	b, _ := json.Marshal(ob)
+			
+	return trades, string(b)
 }
 
 func (ob *OrderBook) processLimitSell(order *Order, buyTree *binarytree.BinaryTree) ([]Trade, bool) {
@@ -249,13 +322,15 @@ func (ob *OrderBook) processLimitSell(order *Order, buyTree *binarytree.BinaryTr
 }
 
 // Process a limit sell order
-func (ob *OrderBook) processOrderB(order Order) []Trade {
+func (ob *OrderBook) processOrderB(order Order) ([]Trade, string) {
 	trades := make([]Trade, 0, 1)
 	maxNode := ob.SellTree.Min()
 	if maxNode == nil {
 		// fmt.Println("adding buynode")
 		ob.addBuyOrder(order)
-		return trades
+		b, _ := json.Marshal(ob)
+			
+		return trades, string(b)
 	}
 	// fmt.Println("processing sell node", maxNode.Key)
 	// fmt.Printf("processing sell node: %#v\n", maxNode)
@@ -286,7 +361,9 @@ func (ob *OrderBook) processOrderB(order Order) []Trade {
 		if order.Price < maxNode.Key {
 			// fmt.Println("adding sellnode directly")
 			ob.addBuyOrder(order)
-			return trades
+			b, _ := json.Marshal(ob)
+			
+			return trades, string(b)
 		}
 		// fmt.Println()
 		// fmt.Println("Execution processLimitBuy")
@@ -307,7 +384,9 @@ func (ob *OrderBook) processOrderB(order Order) []Trade {
 		// print(os.Stdout, ob.BuyTree.Root, 0, 'M')
 
 	}
-	return trades
+	b, _ := json.Marshal(ob)
+			
+	return trades, string(b)
 }
 
 func (ob *OrderBook) processLimitBuy(order *Order, buyTree *binarytree.BinaryTree) ([]Trade, bool) {
