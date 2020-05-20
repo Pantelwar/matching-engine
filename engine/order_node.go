@@ -2,8 +2,8 @@ package engine
 
 // OrderNode ...
 type OrderNode struct {
-	Orders []*Order
-	Volume float64
+	Orders []*Order `json:"orders"`
+	Volume float64  `json:"volume"`
 }
 
 // NewOrderNode returns new OrderNode struct
@@ -20,3 +20,8 @@ func (on *OrderNode) AddOrder(order Order) {
 func (on *OrderNode) UpdateVolume(value float64) {
 	on.Volume += value
 }
+
+// // MarshalJSON implements json.Marshaler interface
+// func (on *OrderNode) MarshalJSON() ([]byte, error) {
+
+// }

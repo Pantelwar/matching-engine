@@ -2,41 +2,20 @@ package engine
 
 import (
 	"encoding/json"
-	"reflect"
+	"fmt"
 )
-
-// Side of the order
-type Side int
-
-// Sell (asks) or Buy (bids)
-const (
-	Sell Side = iota
-	Buy
-)
-
-// UnmarshalJSON implements interface for json unmarshal
-func (s *Side) UnmarshalJSON(data []byte) error {
-	switch string(data) {
-	case `"buy"`:
-		*s = Buy
-	case `"sell"`:
-		*s = Sell
-	default:
-		return &json.UnsupportedValueError{
-			Value: reflect.New(reflect.TypeOf(data)),
-			Str:   string(data),
-		}
-	}
-
-	return nil
-}
 
 // Order describes the struct of the order
 type Order struct {
 	Amount float64 `json:"amount"`
 	Price  float64 `json:"price"`
 	ID     string  `json:"id"`
-	Type   Side    //string  `json:"type"`
+	Type   Side    `json:"type"`
+}
+
+// NewOrder returns *Order
+func NewOrder(id string, orderType Side, amount, price float64) *Order {
+	return &Order{ID: id, Type: orderType, Amount: amount, Price: price}
 }
 
 // FromJSON create the Order struct from json string
@@ -48,4 +27,9 @@ func (order *Order) FromJSON(msg []byte) error {
 func (order *Order) ToJSON() []byte {
 	str, _ := json.Marshal(order)
 	return str
+}
+
+// String implements Stringer interface
+func (order *Order) String() string {
+	return fmt.Sprintf("\n\"%s\":\n\tside: %v\n\tquantity: %f\n\tprice: %f\n\n", order.ID, order.Type, order.Amount, order.Price)
 }
