@@ -7,11 +7,11 @@ import (
 // OrderType defines tree side
 type OrderType struct {
 	Tree *binarytree.BinaryTree
-	Type string
+	Type Side `json:"type"`
 }
 
 // NewOrderType returns OrderType struct
-func NewOrderType(orderSide string) *OrderType {
+func NewOrderType(orderSide Side) *OrderType {
 	bTree := binarytree.NewBinaryTree()
 	bTree.ToggleSplay(true)
 	return &OrderType{Tree: bTree, Type: orderSide}
