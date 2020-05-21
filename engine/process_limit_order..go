@@ -154,6 +154,8 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				// orderComplete = true
 
 				// ele.Amount = 0
+				delete(ob.orders, ele.ID)
+
 				break
 			} else {
 				countMatch++
@@ -165,6 +167,9 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: ele.Amount, Price: ele.Price})
 
 				order.Amount -= ele.Amount
+
+				delete(ob.orders, ele.ID)
+
 			}
 		}
 

@@ -18,10 +18,10 @@ func NewOrderType(orderSide Side) *OrderType {
 }
 
 // AddOrderInQueue adds order to the tree
-func (ot *OrderType) AddOrderInQueue(order Order) error {
+func (ot *OrderType) AddOrderInQueue(order Order) *OrderNode {
 	orderNode := NewOrderNode()
 	orderNode.Orders = append(orderNode.Orders, &order)
 	orderNode.Volume = order.Amount
 	ot.Tree.Insert(order.Price, orderNode)
-	return nil
+	return orderNode
 }
