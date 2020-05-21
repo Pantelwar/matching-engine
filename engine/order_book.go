@@ -13,6 +13,7 @@ type OrderBook struct {
 	BuyTree         *binarytree.BinaryTree
 	SellTree        *binarytree.BinaryTree
 	orderLimitRange int
+	orders          map[string]*OrderNode // orderID -> *Order (*list.Element.Value.(*Order))
 }
 
 // Book ...
@@ -182,11 +183,12 @@ func (ob *OrderBook) String() string {
 	})
 	// fmt.Println()
 	// fmt.Println("buy orders")
+	buys := ""
 	for _, o := range orderSideBuy {
 		// fmt.Println(o)
-		result += o + "\n"
+		buys = o + "\n" + buys
 	}
-
+	result += buys
 	return result
 }
 
@@ -201,6 +203,7 @@ func NewOrderBook() *OrderBook {
 		BuyTree:         bTree,
 		SellTree:        sTree,
 		orderLimitRange: 100,
+		orders:          make(map[string]*OrderNode),
 	}
 }
 
@@ -211,6 +214,7 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
 	node := ob.BuyTree.Root.SearchSubTree(searchNodePrice)
+	var orderNode *OrderNode
 	if node != nil {
 		// fmt.Println("slab found", order.Price)
 		subTree := node.Data.(*OrderType)
@@ -220,17 +224,20 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 			// fmt.Println("node found", order.Price)
 			subTreeNode.Data.(*OrderNode).UpdateVolume(order.Amount)
 			subTreeNode.Data.(*OrderNode).AddOrder(order)
+			orderNode = subTreeNode.Data.(*OrderNode)
 		} else {
 			// fmt.Println("not found", order.Price)
-			subTree.AddOrderInQueue(order)
+			orderNode = subTree.AddOrderInQueue(order)
 		}
 		// return
 	} else {
 		// fmt.Println("adding new slab", order.Price)
 		orderTypeObj := NewOrderType(order.Type)
-		orderTypeObj.AddOrderInQueue(order)
+		orderNode = orderTypeObj.AddOrderInQueue(order)
 		ob.BuyTree.Insert(searchNodePrice, orderTypeObj)
 	}
+	// fmt.Println("ors", orderNode)
+	ob.orders[order.ID] = orderNode
 }
 
 // addSellOrder a buy order to the order book
@@ -240,6 +247,7 @@ func (ob *OrderBook) addSellOrder(order Order) {
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
 	node := ob.SellTree.Root.SearchSubTree(searchNodePrice)
+	var orderNode *OrderNode
 	if node != nil {
 		// fmt.Println("slab found", order.Price)
 		subTree := node.Data.(*OrderType)
@@ -249,17 +257,19 @@ func (ob *OrderBook) addSellOrder(order Order) {
 			// fmt.Println("node found", order.Price)
 			subTreeNode.Data.(*OrderNode).UpdateVolume(order.Amount)
 			subTreeNode.Data.(*OrderNode).AddOrder(order)
+			orderNode = subTreeNode.Data.(*OrderNode)
 		} else {
 			// fmt.Println("not found", order.Price)
-			subTree.AddOrderInQueue(order)
+			orderNode = subTree.AddOrderInQueue(order)
 		}
 		// return
 	} else {
 		// fmt.Println("adding new slab", order.Price)
 		orderTypeObj := NewOrderType(order.Type)
-		orderTypeObj.AddOrderInQueue(order)
+		orderNode = orderTypeObj.AddOrderInQueue(order)
 		ob.SellTree.Insert(searchNodePrice, orderTypeObj)
 	}
+	ob.orders[order.ID] = orderNode
 }
 
 func (ob *OrderBook) removeBuyOrder(key float64) *binarytree.BinaryNode {
@@ -269,3 +279,33 @@ func (ob *OrderBook) removeBuyOrder(key float64) *binarytree.BinaryNode {
 func (ob *OrderBook) removeSellOrder(key float64) *binarytree.BinaryNode {
 	return ob.SellTree.Root.Remove(key)
 }
+
+// func (ob *OrderBook) removeOrder(order *Order, index int) error {
+// 	startPoint := float64(int(math.Ceil(order.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+// 	endPoint := startPoint + float64(ob.orderLimitRange)
+// 	searchNodePrice := (startPoint + endPoint) / 2
+// 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
+// 	node := ob.BuyTree.Root.SearchSubTree(searchNodePrice)
+// 	// var orderNode *OrderNode
+// 	if node != nil {
+// 		// fmt.Println("slab found", order.Price)
+// 		subTree := node.Data.(*OrderType)
+// 		subTreeNode := subTree.Tree.Root.SearchSubTree(order.Price)
+// 		if subTreeNode != nil {
+// 			fmt.Println("Found node to remove")
+// 			subTreeNode.Data.(*OrderNode).UpdateVolume(-order.Amount)
+// 			subTreeNode.Data.(*OrderNode).Orders = append(subTreeNode.Data.(*OrderNode).Orders[:index], subTreeNode.Data.(*OrderNode).Orders[index+1:]...)
+// 			if len(subTreeNode.Data.(*OrderNode).Orders) == 0 {
+// 				// orderNode = nil
+// 				n := subTree.Tree.Root.Remove(order.Price)
+// 				subTree.Tree.Root = n
+// 			}
+// 		} else {
+// 			fmt.Println("nothing")
+// 		}
+// 		// return
+// 	} else {
+// 		fmt.Println("nothing #2")
+// 	}
+// 	return nil
+// }
