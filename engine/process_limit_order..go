@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-
 	"github.com/Pantelwar/binarytree"
 )
 
@@ -16,7 +14,7 @@ func (ob *OrderBook) Process(order Order) ([]*Order, *Order) {
 	return ob.commonProcess(order, ob.BuyTree, ob.addSellOrder, ob.removeBuyOrder)
 }
 
-func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add func(Order), remove func(float64) *binarytree.BinaryNode) ([]*Order, *Order) {
+func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add func(Order), remove func(float64) error) ([]*Order, *Order) {
 	var maxNode *binarytree.BinaryNode
 	if order.Type == Sell {
 		maxNode = tree.Max()
@@ -42,6 +40,7 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 		}
 		if maxNode == nil || noMoreOrders {
 			if order.Amount > 0 {
+				// fmt.Println("adding sell node pending")
 				add(order)
 				//ob.addSellOrder(order)
 				break
@@ -57,9 +56,10 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 		// trades = append(trades, t...)
 
 		if maxNode.Data.(*OrderType).Tree.Root == nil {
-			node := remove(maxNode.Key)
-			// node := ob.removeBuyOrder(maxNode.Key)
-			tree.Root = node
+			// node := remove(maxNode.Key)
+			// // node := ob.removeBuyOrder(maxNode.Key)
+			// tree.Root = node
+			remove(maxNode.Key)
 		}
 	}
 
@@ -100,14 +100,14 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 		}
 		if order.Type == Sell {
 			if order.Price > maxNode.Key {
-				fmt.Println("adding sellnode directly")
+				// fmt.Println("adding sellnode directly")
 				noMoreOrders = true
 				// return trades, noMoreOrders, nil, nil
 				return noMoreOrders, nil, nil
 			}
 		} else {
 			if order.Price < maxNode.Key {
-				fmt.Println("adding buynode directly")
+				// fmt.Println("adding buynode directly")
 				noMoreOrders = true
 				// return trades, noMoreOrders, nil, nil
 				return noMoreOrders, nil, nil
@@ -118,14 +118,21 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 		nodeOrders := nodeData.Orders         //([]*Order)
 		countMatch := 0
 		for _, ele := range nodeOrders {
-			if ele.Price < order.Price {
-				noMoreOrders = true
-				break
+			if order.Type == Sell {
+				if ele.Price < order.Price {
+					noMoreOrders = true
+					break
+				}
+			} else {
+				if ele.Price > order.Price {
+					noMoreOrders = true
+					break
+				}
 			}
 
 			countAdd += ele.Amount
 			if ele.Amount > order.Amount {
-				nodeData.UpdateVolume(-order.Amount)
+				nodeData.updateVolume(-order.Amount)
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
 				amount := ele.Amount - order.Amount
@@ -142,7 +149,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				break
 			}
 			if ele.Amount == order.Amount {
-				nodeData.UpdateVolume(-order.Amount)
+				nodeData.updateVolume(-order.Amount)
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, order.Amount, order.Price))
@@ -162,7 +169,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 
-				nodeData.UpdateVolume(-ele.Amount)
+				nodeData.updateVolume(-ele.Amount)
 
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: ele.Amount, Price: ele.Price})
 

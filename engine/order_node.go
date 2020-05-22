@@ -11,14 +11,21 @@ func NewOrderNode() *OrderNode {
 	return &OrderNode{Orders: []*Order{}, Volume: 0.0}
 }
 
-// AddOrder adds order to node
-func (on *OrderNode) AddOrder(order Order) {
+// addOrder adds order to node
+func (on *OrderNode) addOrder(order Order) {
+	on.updateVolume(order.Amount)
 	on.Orders = append(on.Orders, &order)
 }
 
-// UpdateVolume updates volume
-func (on *OrderNode) UpdateVolume(value float64) {
+// updateVolume updates volume
+func (on *OrderNode) updateVolume(value float64) {
 	on.Volume += value
+}
+
+// removeOrder removes order from OrderNode array
+func (on *OrderNode) removeOrder(index int) {
+	on.updateVolume(-on.Orders[index].Amount)
+	on.Orders = append(on.Orders[:index], on.Orders[index+1:]...)
 }
 
 // // MarshalJSON implements json.Marshaler interface
