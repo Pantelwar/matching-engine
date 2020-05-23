@@ -6,7 +6,7 @@ import (
 )
 
 // Side of the order
-type Side int64
+type Side int
 
 // Sell (asks) or Buy (bids)
 const (
