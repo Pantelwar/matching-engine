@@ -19,21 +19,21 @@ func TestToJSON(t *testing.T) {
 
 func TestFromJSON(t *testing.T) {
 	var tests = []struct {
-		input string
-		err   string
+		input   string
+		err     string
+		message string
 	}{
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", ""},
+		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "", "JSON should be approved"},
 
-		{"{}", "err"},
-		{"{\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err"},
-		{"{\"amount\":5,\"id\":\"b1\",\"type\":\"buy\"}", "err"},
-		{"{\"amount\":5,\"price\":0,\"type\":\"buy\"}", "err"},
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\"}", "err"},
+		{"{}", "err", "Empty JSON should not be passed"},
+		{"{\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for amount key"},
+		{"{\"amount\":5,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for price key"},
+		{"{\"amount\":5,\"price\":7000,\"type\":\"buy\"}", "err", "check for id key"},
+		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\"}", "err", "check for type key"},
 
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"random\"}", "err"},
-		{"{\"amount\":0,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "err"},
-		{"{\"amount\":5,\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err"},
-		{"{\"amount\":0,\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err"},
+		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"random\"}", "err", "check for valid type"},
+		{"{\"amount\":0,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for valid amount"},
+		{"{\"amount\":5,\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for valid price"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
@@ -44,7 +44,7 @@ func TestFromJSON(t *testing.T) {
 			} else if tt.err != "" && err != nil {
 				t.Log("Successful Detection")
 			} else {
-				t.Fatal("Approving invalid json")
+				t.Fatal(tt.message)
 			}
 		})
 	}

@@ -9,9 +9,9 @@ import (
 
 // Order describes the struct of the order
 type Order struct {
-	Amount float64 `json:"amount"`
-	Price  float64 `json:"price"`
-	ID     string  `json:"id"`
+	Amount float64 `json:"amount" validate:"gt=0"`
+	Price  float64 `json:"price" validate:"gt=0"`
+	ID     string  `json:"id" validate:"required"`
 	Type   Side    `json:"type"  validate:"side_validate"`
 }
 
