@@ -228,13 +228,13 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 			orderNode = subTreeNode.Data.(*OrderNode)
 		} else {
 			// fmt.Println("not found", order.Price)
-			orderNode = subTree.AddOrderInQueue(order)
+			orderNode, _ = subTree.AddOrderInQueue(order)
 		}
 		// return
 	} else {
 		// fmt.Println("adding new slab", order.Price)
 		orderTypeObj := NewOrderType(order.Type)
-		orderNode = orderTypeObj.AddOrderInQueue(order)
+		orderNode, _ = orderTypeObj.AddOrderInQueue(order)
 		ob.BuyTree.Insert(searchNodePrice, orderTypeObj)
 	}
 	// fmt.Println("ors", orderNode)
@@ -261,13 +261,13 @@ func (ob *OrderBook) addSellOrder(order Order) {
 			orderNode = subTreeNode.Data.(*OrderNode)
 		} else {
 			// fmt.Println("not found", order.Price)
-			orderNode = subTree.AddOrderInQueue(order)
+			orderNode, _ = subTree.AddOrderInQueue(order)
 		}
 		// return
 	} else {
 		// fmt.Println("adding new slab", order.Price)
 		orderTypeObj := NewOrderType(order.Type)
-		orderNode = orderTypeObj.AddOrderInQueue(order)
+		orderNode, _ = orderTypeObj.AddOrderInQueue(order)
 		ob.SellTree.Insert(searchNodePrice, orderTypeObj)
 	}
 	ob.orders[order.ID] = orderNode
