@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"errors"
+
 	"github.com/Pantelwar/binarytree"
 )
 
@@ -18,10 +20,13 @@ func NewOrderType(orderSide Side) *OrderType {
 }
 
 // AddOrderInQueue adds order to the tree
-func (ot *OrderType) AddOrderInQueue(order Order) *OrderNode {
+func (ot *OrderType) AddOrderInQueue(order Order) (*OrderNode, error) {
+	if ot.Type != order.Type {
+		return nil, errors.New("Invalid order type")
+	}
 	orderNode := NewOrderNode()
 	orderNode.Orders = append(orderNode.Orders, &order)
 	orderNode.Volume = order.Amount
 	ot.Tree.Insert(order.Price, orderNode)
-	return orderNode
+	return orderNode, nil
 }
