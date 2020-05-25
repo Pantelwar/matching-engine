@@ -41,8 +41,6 @@ func (order *Order) FromJSON(msg []byte) error {
 	if err != nil {
 		return err
 	}
-	// order.Type = Sell
-	fmt.Println("o.Type", order.Type)
 	validate := validator.New()
 	validate.RegisterValidation("side_validate", sideValidation)
 	err = validate.Struct(order)
