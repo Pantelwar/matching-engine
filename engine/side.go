@@ -6,12 +6,12 @@ import (
 )
 
 // Side of the order
-type Side int
+type Side string
 
 // Sell (asks) or Buy (bids)
 const (
-	Buy  Side = 0
-	Sell Side = 1
+	Buy  Side = "buy"
+	Sell Side = "sell"
 )
 
 // MarshalJSON implements json.Marshaler interface
