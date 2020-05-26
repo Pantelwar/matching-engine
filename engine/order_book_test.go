@@ -124,3 +124,80 @@ func TestRemoveOrderFromBook(t *testing.T) {
 		t.Fatal("The response should be order not found")
 	}
 }
+
+func TestString(t *testing.T) {
+	var tests = []struct {
+		input  []*Order
+		output string
+	}{
+		{
+			[]*Order{
+				NewOrder("b1", Buy, 5.0, 7000.0),
+				NewOrder("b2", Buy, 10.0, 7000.0),
+			},
+			`------------------------------------------
+7000 -> 15
+`},
+		{
+			[]*Order{
+				NewOrder("b1", Buy, 5.0, 7000.0),
+				NewOrder("b2", Buy, 10.0, 8000.0),
+			},
+			`------------------------------------------
+8000 -> 10
+7000 -> 5
+`},
+		{
+			[]*Order{
+				NewOrder("s1", Sell, 5.0, 7000.0),
+				NewOrder("s2", Sell, 10.0, 7000.0),
+			},
+			`7000 -> 15
+------------------------------------------
+`},
+		{
+			[]*Order{
+				NewOrder("s1", Sell, 5.0, 7000.0),
+				NewOrder("s2", Sell, 10.0, 8000.0),
+			},
+			`8000 -> 10
+7000 -> 5
+------------------------------------------
+`},
+		{
+			[]*Order{
+				NewOrder("s1", Sell, 5.0, 7000.0),
+				NewOrder("b2", Buy, 10.0, 6000.0),
+				NewOrder("s3", Sell, 1.0, 8000.0),
+				NewOrder("b4", Buy, 2.0, 6500.0),
+			},
+			`8000 -> 1
+7000 -> 5
+------------------------------------------
+6500 -> 2
+6000 -> 10
+`},
+		{
+			[]*Order{
+				NewOrder("s1", Sell, 5.134, 7000.0),
+				NewOrder("b2", Buy, 10.134, 6000.0),
+				NewOrder("s3", Sell, 1.32, 7000.0),
+				NewOrder("b4", Buy, 2.1278, 6000.0),
+			},
+			`7000 -> 6.454
+------------------------------------------
+6000 -> 12.2618
+`},
+	}
+
+	for _, tt := range tests {
+		ob := NewOrderBook()
+		for _, o := range tt.input {
+			ob.Process(*o)
+		}
+
+		if tt.output != ob.String() {
+			t.Fatalf("Book prints incorrect (have: \n%s, \nwant: \n%s\n)", ob.String(), tt.output)
+		}
+	}
+}
