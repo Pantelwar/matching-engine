@@ -49,3 +49,31 @@ func TestFromJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestOrderString(t *testing.T) {
+	var tests = []struct {
+		input  *Order
+		output string
+	}{
+		{
+			NewOrder("b1", Buy, 5.0, 7000.0),
+			`"b1":
+	side: buy
+	quantity: 5
+	price: 7000
+`},
+		{
+			NewOrder("s1", Sell, 5.124, 9000.0),
+			`"s1":
+	side: sell
+	quantity: 5.124
+	price: 9000
+`},
+	}
+	for _, tt := range tests {
+		o := tt.input.String()
+		if tt.output != o {
+			t.Fatalf("Book prints incorrect (have: \n%s, \nwant: \n%s\n)", o, tt.output)
+		}
+	}
+}
