@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -59,5 +60,5 @@ func (order *Order) ToJSON() ([]byte, error) {
 
 // String implements Stringer interface
 func (order *Order) String() string {
-	return fmt.Sprintf("\n\"%s\":\n\tside: %v\n\tquantity: %f\n\tprice: %f\n\n", order.ID, order.Type, order.Amount, order.Price)
+	return fmt.Sprintf("\"%s\":\n\tside: %v\n\tquantity: %s\n\tprice: %s\n", order.ID, order.Type, strconv.FormatFloat(order.Amount, 'f', -1, 64), strconv.FormatFloat(order.Price, 'f', -1, 64))
 }
