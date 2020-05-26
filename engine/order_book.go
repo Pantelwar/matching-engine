@@ -273,15 +273,13 @@ func (ob *OrderBook) addSellOrder(order Order) {
 	ob.orders[order.ID] = orderNode
 }
 
-func (ob *OrderBook) removeBuyOrder(key float64) error {
-	// return ob.BuyTree.Root.Remove(key)
+func (ob *OrderBook) removeBuyNode(key float64) error {
 	node := ob.BuyTree.Root.Remove(key)
 	ob.BuyTree.Root = node
 	return nil
 }
 
-func (ob *OrderBook) removeSellOrder(key float64) error {
-	// return ob.BuyTree.Root.Remove(key)
+func (ob *OrderBook) removeSellNode(key float64) error {
 	node := ob.SellTree.Root.Remove(key)
 	ob.SellTree.Root = node
 	return nil
