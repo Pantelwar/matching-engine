@@ -8,10 +8,10 @@ import (
 func (ob *OrderBook) Process(order Order) ([]*Order, *Order) {
 	if order.Type == Buy {
 		// return ob.processOrderB(order)
-		return ob.commonProcess(order, ob.SellTree, ob.addBuyOrder, ob.removeSellOrder)
+		return ob.commonProcess(order, ob.SellTree, ob.addBuyOrder, ob.removeSellNode)
 	}
 	// return ob.processOrderS(order)
-	return ob.commonProcess(order, ob.BuyTree, ob.addSellOrder, ob.removeBuyOrder)
+	return ob.commonProcess(order, ob.BuyTree, ob.addSellOrder, ob.removeBuyNode)
 }
 
 func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add func(Order), remove func(float64) error) ([]*Order, *Order) {
@@ -57,7 +57,7 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 
 		if maxNode.Data.(*OrderType).Tree.Root == nil {
 			// node := remove(maxNode.Key)
-			// // node := ob.removeBuyOrder(maxNode.Key)
+			// // node := ob.removeBuyNode(maxNode.Key)
 			// tree.Root = node
 			remove(maxNode.Key)
 		}
@@ -181,7 +181,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 		}
 
 		if len(nodeOrders) == countMatch {
-			node := tree.Root.Remove(maxNode.Key) // ob.removeBuyOrder(maxNode.Key, buyTree)
+			node := tree.Root.Remove(maxNode.Key) // ob.removeBuyNode(maxNode.Key, buyTree)
 			// fmt.Printf("node removed: %#v %#v\n", node, maxNode)
 			tree.Root = node
 		}
