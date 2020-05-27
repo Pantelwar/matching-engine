@@ -9,9 +9,9 @@ func TestNewOrder(t *testing.T) {
 }
 
 func TestToJSON(t *testing.T) {
-	data := NewOrder("b1", Buy, 5.0, 7000.0)
+	order := NewOrder("b1", Buy, 5.0, 7000.0)
 
-	result, _ := data.ToJSON()
+	result, _ := order.ToJSON()
 	if string(result) != "{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}" {
 		t.Fatal("Result should be: {\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}, got: " + string(result))
 	}
@@ -26,23 +26,23 @@ func TestFromJSON(t *testing.T) {
 		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "", "JSON should be approved"},
 
 		{"{}", "err", "Empty JSON should not be passed"},
-		{"{\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for amount key"},
-		{"{\"amount\":5,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for price key"},
-		{"{\"amount\":5,\"price\":7000,\"type\":\"buy\"}", "err", "check for id key"},
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\"}", "err", "check for type key"},
+		{"{\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for amount key"},
+		{"{\"amount\":5,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for price key"},
+		{"{\"amount\":5,\"price\":7000,\"type\":\"buy\"}", "err", "Check for id key"},
+		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\"}", "err", "Check for type key"},
 
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"random\"}", "err", "check for valid type"},
-		{"{\"amount\":0,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for valid amount"},
-		{"{\"amount\":5,\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "check for valid price"},
+		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"random\"}", "err", "Check for valid type"},
+		{"{\"amount\":0,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid amount"},
+		{"{\"amount\":5,\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid price"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			data1 := &Order{}
-			err := data1.FromJSON([]byte(tt.input))
+			order := &Order{}
+			err := order.FromJSON([]byte(tt.input))
 			if tt.err == "" && err == nil {
-				t.Log("Successful Detection")
+				t.Log("Successfully detecting error")
 			} else if tt.err != "" && err != nil {
-				t.Log("Successful Detection")
+				t.Log("Successful detection of json")
 			} else {
 				t.Fatal(tt.message)
 			}
