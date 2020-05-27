@@ -14,10 +14,10 @@ func TestAddOrderInQueue(t *testing.T) {
 		input *Order
 		err   bool
 	}{
-		{NewOrder("b1", Buy, 5.0, 7000.0), true},
-		{NewOrder("s2", Sell, 10.0, 7000.0), false},
-		{NewOrder("b3", Buy, 11.0, 8000.0), true},
-		{NewOrder("s4", Sell, 2.0, 10000.0), false},
+		{NewOrder("b1", Buy, "5.0", "7000.0"), true},
+		{NewOrder("s2", Sell, "10.0", "7000.0"), false},
+		{NewOrder("b3", Buy, "11.0", "8000.0"), true},
+		{NewOrder("s4", Sell, "2.0", "10000.0"), false},
 	}
 	ot := NewOrderType("sell")
 	for _, tt := range tests {
@@ -37,7 +37,8 @@ func TestAddOrderInQueue(t *testing.T) {
 		}
 	}
 
-	node := ot.Tree.Root.SearchSubTree(tests[1].input.Price)
+	price, _ := tests[1].input.Price.Float64()
+	node := ot.Tree.Root.SearchSubTree(price)
 	if node == nil {
 		t.Fatal("There should exists a node in orderType.Tree")
 	}

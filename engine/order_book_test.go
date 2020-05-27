@@ -15,10 +15,10 @@ func TestAddOrderInBook(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, 5.0, 7000.0)},
-		{NewOrder("s2", Sell, 10.0, 7000.0)},
-		{NewOrder("s3", Sell, 10.0, 7000.0)},
-		{NewOrder("b4", Buy, 1.0, 7000.0)},
+		{NewOrder("b1", Buy, "5.0", "7000.0")},
+		{NewOrder("s2", Sell, "10.0", "7000.0")},
+		{NewOrder("s3", Sell, "10.0", "7000.0")},
+		{NewOrder("b4", Buy, "1.0", "7000.0")},
 	}
 	ob := NewOrderBook()
 
@@ -33,7 +33,8 @@ func TestAddOrderInBook(t *testing.T) {
 			t.Fatal("Order should be pushed in orders array")
 		}
 
-		startPoint := float64(int(math.Ceil(tt.input.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+		price, _ := tt.input.Price.Float64()
+		startPoint := float64(int(math.Ceil(price)) / ob.orderLimitRange * ob.orderLimitRange)
 		endPoint := startPoint + float64(ob.orderLimitRange)
 		searchNodePrice := (startPoint + endPoint) / 2
 
@@ -54,10 +55,10 @@ func TestRemoveOrderNodeFromBook(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, 5.0, 7000.0)},
-		{NewOrder("s2", Sell, 10.0, 7000.0)},
-		{NewOrder("s3", Sell, 10.0, 7000.0)},
-		{NewOrder("b4", Buy, 1.0, 7000.0)},
+		{NewOrder("b1", Buy, "5.0", "7000.0")},
+		{NewOrder("s2", Sell, "10.0", "7000.0")},
+		{NewOrder("s3", Sell, "10.0", "7000.0")},
+		{NewOrder("b4", Buy, "1.0", "7000.0")},
 	}
 	ob := NewOrderBook()
 
@@ -69,7 +70,8 @@ func TestRemoveOrderNodeFromBook(t *testing.T) {
 		}
 	}
 
-	startPoint := float64(int(math.Ceil(tests[0].input.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	price, _ := tests[0].input.Price.Float64()
+	startPoint := float64(int(math.Ceil(price)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
 
@@ -82,7 +84,8 @@ func TestRemoveOrderNodeFromBook(t *testing.T) {
 		t.Fatal("Buy Mid Price should be get removed from tree")
 	}
 
-	startPoint = float64(int(math.Ceil(tests[1].input.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	price, _ = tests[1].input.Price.Float64()
+	startPoint = float64(int(math.Ceil(price)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint = startPoint + float64(ob.orderLimitRange)
 	searchNodePrice = (startPoint + endPoint) / 2
 
@@ -99,10 +102,10 @@ func TestRemoveOrderFromBook(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, 5.0, 7000.0)},
-		{NewOrder("s2", Sell, 10.0, 7000.0)},
-		{NewOrder("s3", Sell, 10.0, 7000.0)},
-		{NewOrder("b4", Buy, 1.0, 7000.0)},
+		{NewOrder("b1", Buy, "5.0", "7000.0")},
+		{NewOrder("s2", Sell, "10.0", "7000.0")},
+		{NewOrder("s3", Sell, "10.0", "7000.0")},
+		{NewOrder("b4", Buy, "1.0", "7000.0")},
 	}
 	ob := NewOrderBook()
 
@@ -132,16 +135,16 @@ func TestString(t *testing.T) {
 	}{
 		{
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
-				NewOrder("b2", Buy, 10.0, 7000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
+				NewOrder("b2", Buy, "10.0", "7000.0"),
 			},
 			`------------------------------------------
 7000 -> 15
 `},
 		{
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
-				NewOrder("b2", Buy, 10.0, 8000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
+				NewOrder("b2", Buy, "10.0", "8000.0"),
 			},
 			`------------------------------------------
 8000 -> 10
@@ -149,16 +152,16 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, 5.0, 7000.0),
-				NewOrder("s2", Sell, 10.0, 7000.0),
+				NewOrder("s1", Sell, "5.0", "7000.0"),
+				NewOrder("s2", Sell, "10.0", "7000.0"),
 			},
 			`7000 -> 15
 ------------------------------------------
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, 5.0, 7000.0),
-				NewOrder("s2", Sell, 10.0, 8000.0),
+				NewOrder("s1", Sell, "5.0", "7000.0"),
+				NewOrder("s2", Sell, "10.0", "8000.0"),
 			},
 			`8000 -> 10
 7000 -> 5
@@ -166,10 +169,10 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, 5.0, 7000.0),
-				NewOrder("b2", Buy, 10.0, 6000.0),
-				NewOrder("s3", Sell, 1.0, 8000.0),
-				NewOrder("b4", Buy, 2.0, 6500.0),
+				NewOrder("s1", Sell, "5.0", "7000.0"),
+				NewOrder("b2", Buy, "10.0", "6000.0"),
+				NewOrder("s3", Sell, "1.0", "8000.0"),
+				NewOrder("b4", Buy, "2.0", "6500.0"),
 			},
 			`8000 -> 1
 7000 -> 5
@@ -179,10 +182,10 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, 5.134, 7000.0),
-				NewOrder("b2", Buy, 10.134, 6000.0),
-				NewOrder("s3", Sell, 1.32, 7000.0),
-				NewOrder("b4", Buy, 2.1278, 6000.0),
+				NewOrder("s1", Sell, "5.134", "7000.0"),
+				NewOrder("b2", Buy, "10.134", "6000.0"),
+				NewOrder("s3", Sell, "1.32", "7000.0"),
+				NewOrder("b4", Buy, "2.1278", "6000.0"),
 			},
 			`7000 -> 6.454
 ------------------------------------------

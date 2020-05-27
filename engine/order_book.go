@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
+	"strconv"
 
 	"github.com/Pantelwar/binarytree"
 )
@@ -24,8 +26,8 @@ type Book struct {
 }
 
 type orderinfo struct {
-	Price  float64 `json:"price"`
-	Amount float64 `json:"amount"`
+	Price  *big.Float `json:"price"`
+	Amount *big.Float `json:"amount"`
 }
 
 // // GetOrders ...
@@ -93,7 +95,7 @@ func (ob *OrderBook) MarshalJSON() ([]byte, error) {
 			// fmt.Println("    value", i)
 			var b orderinfo
 			// res := fmt.Sprintf("%#f -> ", i)
-			b.Price = i
+			b.Price = new(big.Float).SetFloat64(i)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
@@ -115,7 +117,7 @@ func (ob *OrderBook) MarshalJSON() ([]byte, error) {
 			// fmt.Println("    value", i)
 			var b orderinfo
 			// res := fmt.Sprintf("%#f -> ", i)
-			b.Price = i
+			b.Price = new(big.Float).SetFloat64(i)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
@@ -148,22 +150,23 @@ func (ob *OrderBook) String() string {
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
 			// result = append(result, fmt.Sprintf("%#v", i))
 			// fmt.Println("    value", i)
-			res := fmt.Sprintf("%#f -> ", i)
+			res := strconv.FormatFloat(i, 'f', -1, 64) + " -> " //fmt.Sprintf("%#f -> ", i)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
-			res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
+			res += subNode.Data.(*OrderNode).Volume.String() // strconv.FormatFloat(subNode.Data.(*OrderNode).Volume, 'f', -1, 64) //fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
 			// fmt.Println("res", res)
 			orderSideSell = append(orderSideSell, res)
 		})
 	})
 	// fmt.Println()
 	// fmt.Println("sell orders")
+	sells := ""
 	for _, o := range orderSideSell {
 		// fmt.Println(o)
-		result += o + "\n"
+		sells = o + "\n" + sells
 	}
-	result += "------------------------------------------\n"
+	result = sells + "------------------------------------------\n"
 
 	var orderSideBuy []string
 	ob.BuyTree.Root.InOrderTraverse(func(i float64) {
@@ -173,11 +176,11 @@ func (ob *OrderBook) String() string {
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
 			// result = append(result, fmt.Sprintf("%#v", i))
 			// fmt.Println("    value", i)
-			res := fmt.Sprintf("%#f -> ", i)
+			res := strconv.FormatFloat(i, 'f', -1, 64) + " -> " // fmt.Sprintf("%#f -> ", i)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
-			res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
+			res += subNode.Data.(*OrderNode).Volume.String() // strconv.FormatFloat(subNode.Data.(*OrderNode).Volume, 'f', -1, 64) //fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
 			// fmt.Println("res b", res)
 			orderSideBuy = append(orderSideBuy, res)
 		})
@@ -210,7 +213,8 @@ func NewOrderBook() *OrderBook {
 
 // addBuyOrder a buy order to the order book
 func (ob *OrderBook) addBuyOrder(order Order) {
-	startPoint := float64(int(math.Ceil(order.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	orderPrice, _ := order.Price.Float64()
+	startPoint := float64(int(math.Ceil(orderPrice)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
@@ -219,7 +223,7 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 	if node != nil {
 		// fmt.Println("slab found", order.Price)
 		subTree := node.Data.(*OrderType)
-		subTreeNode := subTree.Tree.Root.SearchSubTree(order.Price)
+		subTreeNode := subTree.Tree.Root.SearchSubTree(orderPrice)
 		if subTreeNode != nil {
 			// order.Amount += node.Datorder.Priceorder.Pricea.(Order).Amount
 			// fmt.Println("node found", order.Price)
@@ -243,7 +247,8 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 
 // addSellOrder a buy order to the order book
 func (ob *OrderBook) addSellOrder(order Order) {
-	startPoint := float64(int(math.Ceil(order.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	orderPrice, _ := order.Price.Float64()
+	startPoint := float64(int(math.Ceil(orderPrice)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
@@ -252,7 +257,7 @@ func (ob *OrderBook) addSellOrder(order Order) {
 	if node != nil {
 		// fmt.Println("slab found", order.Price)
 		subTree := node.Data.(*OrderType)
-		subTreeNode := subTree.Tree.Root.SearchSubTree(order.Price)
+		subTreeNode := subTree.Tree.Root.SearchSubTree(orderPrice)
 		if subTreeNode != nil {
 			// order.Amount += node.Datorder.Priceorder.Pricea.(Order).Amount
 			// fmt.Println("node found", order.Price)
@@ -286,7 +291,8 @@ func (ob *OrderBook) removeSellNode(key float64) error {
 }
 
 func (ob *OrderBook) removeOrder(order *Order) error {
-	startPoint := float64(int(math.Ceil(order.Price)) / ob.orderLimitRange * ob.orderLimitRange)
+	orderPrice, _ := order.Price.Float64()
+	startPoint := float64(int(math.Ceil(orderPrice)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
 	// fmt.Println("search node", startPoint, searchNodePrice, endPoint)
@@ -299,14 +305,14 @@ func (ob *OrderBook) removeOrder(order *Order) error {
 	if node != nil {
 		// fmt.Println("slab found", order.Price)
 		subTree := node.Data.(*OrderType)
-		subTreeNode := subTree.Tree.Root.SearchSubTree(order.Price)
+		subTreeNode := subTree.Tree.Root.SearchSubTree(orderPrice)
 		if subTreeNode != nil {
 			fmt.Println("Found node to remove")
 			// subTreeNode.Data.(*OrderNode).updateVolume(-order.Amount)
 			// subTreeNode.Data.(*OrderNode).Orders = append(subTreeNode.Data.(*OrderNode).Orders[:index], subTreeNode.Data.(*OrderNode).Orders[index+1:]...)
 			// if len(subTreeNode.Data.(*OrderNode).Orders) == 0 {
 			// orderNode = nil
-			n := subTree.Tree.Root.Remove(order.Price)
+			n := subTree.Tree.Root.Remove(orderPrice)
 			subTree.Tree.Root = n
 			// }
 		} else {

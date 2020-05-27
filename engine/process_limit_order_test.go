@@ -14,74 +14,74 @@ func TestProcessLimitOrder(t *testing.T) {
 	}{
 		{
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
 			},
-			NewOrder("s2", Sell, 5.0, 8000.0),
+			NewOrder("s2", Sell, "5.0", "8000.0"),
 			[]*Order{},
 			nil,
 		},
 		{
 			[]*Order{
-				NewOrder("s2", Sell, 5.0, 8000.0),
+				NewOrder("s2", Sell, "5.0", "8000.0"),
 			},
-			NewOrder("b1", Buy, 5.0, 7000.0),
+			NewOrder("b1", Buy, "5.0", "7000.0"),
 			[]*Order{},
 			nil,
 		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
 			},
-			NewOrder("s2", Sell, 5.0, 7000.0),
+			NewOrder("s2", Sell, "5.0", "7000.0"),
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
-				NewOrder("s2", Sell, 5.0, 7000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
+				NewOrder("s2", Sell, "5.0", "7000.0"),
 			},
 			nil,
 		},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, 5.0, 7000.0),
+				NewOrder("s1", Sell, "5.0", "7000.0"),
 			},
-			NewOrder("b2", Buy, 5.0, 7000.0),
+			NewOrder("b2", Buy, "5.0", "7000.0"),
 			[]*Order{
-				NewOrder("s1", Sell, 5.0, 7000.0),
-				NewOrder("b2", Buy, 5.0, 7000.0),
+				NewOrder("s1", Sell, "5.0", "7000.0"),
+				NewOrder("b2", Buy, "5.0", "7000.0"),
 			},
 			nil,
 		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
 			},
-			NewOrder("s2", Sell, 1.0, 7000.0),
+			NewOrder("s2", Sell, "1.0", "7000.0"),
 			[]*Order{
-				NewOrder("s2", Sell, 1.0, 7000.0),
+				NewOrder("s2", Sell, "1.0", "7000.0"),
 			},
-			NewOrder("b1", Buy, 4.0, 7000.0),
+			NewOrder("b1", Buy, "4.0", "7000.0"),
 		},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, 5.0, 7000.0),
+				NewOrder("s1", Sell, "5.0", "7000.0"),
 			},
-			NewOrder("b2", Buy, 1.0, 7000.0),
+			NewOrder("b2", Buy, "1.0", "7000.0"),
 			[]*Order{
-				NewOrder("b2", Buy, 1.0, 7000.0),
+				NewOrder("b2", Buy, "1.0", "7000.0"),
 			},
-			NewOrder("s1", Sell, 4.0, 7000.0),
+			NewOrder("s1", Sell, "4.0", "7000.0"),
 		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
-				NewOrder("b1", Buy, 5.0, 7000.0),
+				NewOrder("b1", Buy, "5.0", "7000.0"),
 			},
-			NewOrder("s2", Sell, 1.0, 6000.0),
+			NewOrder("s2", Sell, "1.0", "7000.0"),
 			[]*Order{
-				NewOrder("s2", Sell, 1.0, 7000.0),
+				NewOrder("s2", Sell, "1.0", "7000.0"),
 			},
-			NewOrder("b1", Buy, 4.0, 7000.0),
+			NewOrder("b1", Buy, "4.0", "7000.0"),
 		},
 	}
 
@@ -96,18 +96,19 @@ func TestProcessLimitOrder(t *testing.T) {
 		processedOrder, partialOrder := ob.Process(*tt.input)
 		fmt.Println("result ", i, processedOrder, partialOrder)
 		for i, po := range processedOrder {
-			if *po != *tt.processedOrder[i] {
+			if po.String() != tt.processedOrder[i].String() {
+				fmt.Println(i, po, tt.processedOrder[i], len(po.String()), len(tt.processedOrder[i].String()))
 				t.Fatalf("Incorrect processedOrder: (have: \n%s\n, want: \n%s\n)", processedOrder, tt.processedOrder)
 			}
 		}
 
 		if tt.partialOrder == nil {
 			if partialOrder != tt.partialOrder {
-				// fmt.Println(len(partialOrder.String()), len((tt.partialOrder.String())))
+				fmt.Println(len(partialOrder.String()), len((tt.partialOrder.String())))
 				t.Fatalf("Incorrect partialOrder: (have: \n%s\n, want: \n%s)", partialOrder, tt.partialOrder)
 			}
 		} else {
-			if *partialOrder != *tt.partialOrder {
+			if partialOrder.String() != tt.partialOrder.String() {
 				// fmt.Println(len(partialOrder.String()), len((tt.partialOrder.String())))
 				t.Fatalf("Incorrect partialOrder: (have: \n%s\n, want: \n%s)", partialOrder, tt.partialOrder)
 			}

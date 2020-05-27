@@ -3,34 +3,46 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"math/big"
 
 	"gopkg.in/go-playground/validator.v9"
 )
 
 // Order describes the struct of the order
 type Order struct {
-	Amount float64 `json:"amount" validate:"gt=0"`
-	Price  float64 `json:"price" validate:"gt=0"`
-	ID     string  `json:"id" validate:"required"`
-	Type   Side    `json:"type"  validate:"side_validate"`
+	Amount *big.Float `json:"amount"` // validate:"side_validate"`
+	Price  *big.Float `json:"price"`  // validate:"side_validate"`
+	ID     string     `json:"id"`     // validate:"required"`
+	Type   Side       `json:"type"`   //  validate:"side_validate"`
 }
 
 func sideValidation(fl validator.FieldLevel) bool {
+	// fmt.Println("sideValidation", fl.Field().Interface())
 	if fl.Field().Interface() != Buy && fl.Field().Interface() != Sell {
 		return false
 	}
 	return true
 }
 
+func bigFloatValidation(fl validator.FieldLevel) bool {
+	// fmt.Println("bigFloatValidation", fl.Field().Float(), fl.Field().Float() <= 0)
+	if fl.Field().Float() <= 0 {
+		return false
+	}
+	return true
+}
+
 // NewOrder returns *Order
-func NewOrder(id string, orderType Side, amount, price float64) *Order {
-	o := &Order{ID: id, Type: orderType, Amount: amount, Price: price}
+func NewOrder(id string, orderType Side, amount, price string) *Order {
+	amountBig, _ := new(big.Float).SetString(amount)
+	priceBig, _ := new(big.Float).SetString(price)
+	o := &Order{ID: id, Type: orderType, Amount: amountBig, Price: priceBig}
 	validate := validator.New()
 	validate.RegisterValidation("side_validate", sideValidation)
+	// validate.RegisterValidation("big_float_validation", bigFloatValidation)
 	err := validate.Struct(o)
 	if err != nil {
-		fmt.Println("error", err)
+		// fmt.Println("error", err)
 		return nil
 	}
 	return o //&Order{ID: id, Type: orderType, Amount: amount, Price: price}
@@ -42,13 +54,15 @@ func (order *Order) FromJSON(msg []byte) error {
 	if err != nil {
 		return err
 	}
-	validate := validator.New()
-	validate.RegisterValidation("side_validate", sideValidation)
-	err = validate.Struct(order)
-	if err != nil {
-		fmt.Println("error", err)
-		return err
-	}
+	// fmt.Printf("Final order: %#v\n", order)
+	// validate := validator.New()
+	// validate.RegisterValidation("side_validate", sideValidation)
+	// // validate.RegisterValidation("big_float_validation", bigFloatValidation)
+	// err = validate.Struct(order)
+	// if err != nil {
+	// 	fmt.Println("error", err)
+	// 	return err
+	// }
 	return nil
 }
 
@@ -60,5 +74,53 @@ func (order *Order) ToJSON() ([]byte, error) {
 
 // String implements Stringer interface
 func (order *Order) String() string {
-	return fmt.Sprintf("\"%s\":\n\tside: %v\n\tquantity: %s\n\tprice: %s\n", order.ID, order.Type, strconv.FormatFloat(order.Amount, 'f', -1, 64), strconv.FormatFloat(order.Price, 'f', -1, 64))
+	return fmt.Sprintf("\"%s\":\n\tside: %v\n\tquantity: %s\n\tprice: %s\n", order.ID, order.Type, order.Amount.String(), order.Price.String())
+}
+
+// UnmarshalJSON implements json.Unmarshaler interface
+func (order *Order) UnmarshalJSON(data []byte) error {
+	obj := struct {
+		Amount float64 `json:"amount" validate:"big_float_validation"`
+		Price  float64 `json:"price" validate:"big_float_validation"`
+		ID     string  `json:"id" validate:"required"`
+		Type   Side    `json:"type" validate:"side_validate"`
+	}{}
+
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	validate := validator.New()
+	validate.RegisterValidation("side_validate", sideValidation)
+	validate.RegisterValidation("big_float_validation", bigFloatValidation)
+	err := validate.Struct(obj)
+	if err != nil {
+		// fmt.Println("error", err)
+		return err
+	}
+
+	order.ID = obj.ID
+	order.Amount = new(big.Float).SetFloat64(obj.Amount)
+	order.Price = new(big.Float).SetFloat64(obj.Price)
+	order.Type = obj.Type
+	// fmt.Printf("order Value: %#v\n", order)
+	return nil
+}
+
+// MarshalJSON implements json.Marshaler interface
+func (order *Order) MarshalJSON() ([]byte, error) {
+	orderAmount, _ := order.Amount.Float64()
+	orderPrice, _ := order.Price.Float64()
+	return json.Marshal(
+		&struct {
+			Amount float64 `json:"amount"`
+			Price  float64 `json:"price"`
+			ID     string  `json:"id"`
+			Type   Side    `json:"type"`
+		}{
+			Amount: orderAmount,
+			Price:  orderPrice,
+			ID:     order.ID,
+			Type:   order.Type,
+		},
+	)
 }
