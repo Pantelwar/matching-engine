@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/Pantelwar/binarytree"
 )
@@ -27,6 +28,7 @@ func (ot *OrderType) AddOrderInQueue(order Order) (*OrderNode, error) {
 	orderNode := NewOrderNode()
 	orderNode.Orders = append(orderNode.Orders, &order)
 	orderNode.Volume = order.Amount
-	ot.Tree.Insert(order.Price, orderNode)
+	orderPrice, _ := strconv.ParseFloat(order.Price, 64)
+	ot.Tree.Insert(orderPrice, orderNode)
 	return orderNode, nil
 }

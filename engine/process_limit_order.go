@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/Pantelwar/binarytree"
 )
 
@@ -31,7 +33,7 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 	noMoreOrders := false
 	var allOrdersProcessed []*Order
 	var partialOrder *Order
-	for maxNode == nil || order.Amount > 0 {
+	for maxNode == nil || GreaterThan(order.Amount, "0") { // order.Amount > 0 {
 		count++
 		if order.Type == Sell {
 			maxNode = tree.Max()
@@ -39,7 +41,7 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 			maxNode = tree.Min()
 		}
 		if maxNode == nil || noMoreOrders {
-			if order.Amount > 0 {
+			if GreaterThan(order.Amount, "0") { //order.Amount > 0 {
 				// fmt.Println("adding sell node pending")
 				add(order)
 				//ob.addSellOrder(order)
@@ -83,15 +85,15 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 		// return trades, noMoreOrders, nil, nil
 		return noMoreOrders, nil, nil
 	}
-	countAdd := 0.0
-	for maxNode == nil || order.Amount > 0 {
+	// countAdd := 0.0
+	for maxNode == nil || GreaterThan(order.Amount, "0") { //} order.Amount > 0 {
 		if order.Type == Sell {
 			maxNode = tree.Max()
 		} else {
 			maxNode = tree.Min()
 		}
 		if maxNode == nil || noMoreOrders {
-			if order.Amount > 0 {
+			if GreaterThan(order.Amount, "0") { //order.Amount > 0 {
 				partialOrder = NewOrder(order.ID, order.Type, order.Amount, order.Price)
 				break
 			} else {
@@ -99,14 +101,16 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 			}
 		}
 		if order.Type == Sell {
-			if order.Price > maxNode.Key {
+			if GreaterThan(order.Price, fmt.Sprintf("%f", maxNode.Key)) { //}
+				// if order.Price > maxNode.Key {
 				// fmt.Println("adding sellnode directly")
 				noMoreOrders = true
 				// return trades, noMoreOrders, nil, nil
 				return noMoreOrders, nil, nil
 			}
 		} else {
-			if order.Price < maxNode.Key {
+			if LessThan(order.Price, fmt.Sprintf("%f", maxNode.Key)) { //}
+				// if order.Price < maxNode.Key {
 				// fmt.Println("adding buynode directly")
 				noMoreOrders = true
 				// return trades, noMoreOrders, nil, nil
@@ -130,12 +134,14 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				}
 			}
 
-			countAdd += ele.Amount
-			if ele.Amount > order.Amount {
-				nodeData.updateVolume(-order.Amount)
+			// countAdd += ele.Amount
+			if GreaterThan(ele.Amount, order.Amount) {
+				orderAmount := Sub("0", order.Amount)
+				nodeData.updateVolume(orderAmount)
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
-				amount := ele.Amount - order.Amount
+				// amount := ele.Amount - order.Amount
+				amount := Sub(ele.Amount, order.Amount)
 				// amount = math.Floor(amount*100000000) / 100000000
 				ele.Amount = amount
 
@@ -144,12 +150,13 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 
 				maxNode.SetData(nodeData)
 
-				order.Amount = 0.0
+				order.Amount = "0" //0.0
 				noMoreOrders = true
 				break
 			}
-			if ele.Amount == order.Amount {
-				nodeData.updateVolume(-order.Amount)
+			if Equal(ele.Amount, order.Amount) {
+				orderAmount := Sub("0", order.Amount)
+				nodeData.updateVolume(orderAmount)
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, order.Amount, order.Price))
@@ -157,7 +164,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				countMatch++
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
-				order.Amount = 0.0
+				order.Amount = "0" //0.0
 				// orderComplete = true
 
 				// ele.Amount = 0
@@ -169,11 +176,13 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 
-				nodeData.updateVolume(-ele.Amount)
+				eleAmount := Sub("0", ele.Amount)
+				nodeData.updateVolume(eleAmount)
 
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: ele.Amount, Price: ele.Price})
 
-				order.Amount -= ele.Amount
+				// order.Amount -= ele.Amount
+				order.Amount = Sub(order.Amount, ele.Amount)
 
 				delete(ob.orders, ele.ID)
 

@@ -8,14 +8,14 @@ func TestCancelOrder(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, 5.0, 7000.0)},
-		{NewOrder("b2", Buy, 10.0, 5000.0)},
-		{NewOrder("b3", Buy, 11.0, 7000.0)},
-		{NewOrder("b4", Buy, 1.0, 7000.0)},
-		{NewOrder("s1", Sell, 5.0, 8000.0)},
-		{NewOrder("s2", Sell, 10.0, 9000.0)},
-		{NewOrder("s3", Sell, 11.0, 9000.0)},
-		{NewOrder("s4", Sell, 1.0, 7500.0)},
+		{NewOrder("b1", Buy, "5.0", "7000.0")},
+		{NewOrder("b2", Buy, "10.0", "5000.0")},
+		{NewOrder("b3", Buy, "11.0", "7000.0")},
+		{NewOrder("b4", Buy, "1.0", "7000.0")},
+		{NewOrder("s1", Sell, "5.0", "8000.0")},
+		{NewOrder("s2", Sell, "10.0", "9000.0")},
+		{NewOrder("s3", Sell, "11.0", "9000.0")},
+		{NewOrder("s4", Sell, "1.0", "7500.0")},
 	}
 	ob := NewOrderBook()
 

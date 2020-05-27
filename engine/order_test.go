@@ -5,11 +5,11 @@ import (
 )
 
 func TestNewOrder(t *testing.T) {
-	t.Log(NewOrder("b1", Sell, 5.0, 7000.0))
+	t.Log(NewOrder("b1", Sell, "5.0", "7000.0"))
 }
 
 func TestToJSON(t *testing.T) {
-	order := NewOrder("b1", Buy, 5.0, 7000.0)
+	order := NewOrder("b1", Buy, "5.0", "7000.0")
 
 	result, _ := order.ToJSON()
 	if string(result) != "{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}" {
@@ -56,14 +56,14 @@ func TestOrderString(t *testing.T) {
 		output string
 	}{
 		{
-			NewOrder("b1", Buy, 5.0, 7000.0),
+			NewOrder("b1", Buy, "5.0", "7000.0"),
 			`"b1":
 	side: buy
 	quantity: 5
 	price: 7000
 `},
 		{
-			NewOrder("s1", Sell, 5.124, 9000.0),
+			NewOrder("s1", Sell, "5.124", "9000.0"),
 			`"s1":
 	side: sell
 	quantity: 5.124
