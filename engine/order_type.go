@@ -27,6 +27,7 @@ func (ot *OrderType) AddOrderInQueue(order Order) (*OrderNode, error) {
 	orderNode := NewOrderNode()
 	orderNode.Orders = append(orderNode.Orders, &order)
 	orderNode.Volume = order.Amount
-	ot.Tree.Insert(order.Price, orderNode)
+	orderPrice, _ := order.Price.Float64()
+	ot.Tree.Insert(orderPrice, orderNode)
 	return orderNode, nil
 }

@@ -1,14 +1,16 @@
 package engine
 
+import "github.com/shopspring/decimal"
+
 // OrderNode ...
 type OrderNode struct {
-	Orders []*Order `json:"orders"`
-	Volume float64  `json:"volume"`
+	Orders []*Order        `json:"orders"`
+	Volume decimal.Decimal `json:"volume"`
 }
 
 // NewOrderNode returns new OrderNode struct
 func NewOrderNode() *OrderNode {
-	return &OrderNode{Orders: []*Order{}, Volume: 0.0}
+	return &OrderNode{Orders: []*Order{}, Volume: decimal.NewFromFloat(0.0)}
 }
 
 // addOrder adds order to node
@@ -18,13 +20,13 @@ func (on *OrderNode) addOrder(order Order) {
 }
 
 // updateVolume updates volume
-func (on *OrderNode) updateVolume(value float64) {
-	on.Volume += value
+func (on *OrderNode) updateVolume(value decimal.Decimal) {
+	on.Volume = on.Volume.Add(value)
 }
 
 // removeOrder removes order from OrderNode array
 func (on *OrderNode) removeOrder(index int) {
-	on.updateVolume(-on.Orders[index].Amount)
+	on.updateVolume(on.Orders[index].Amount.Neg())
 	on.Orders = append(on.Orders[:index], on.Orders[index+1:]...)
 }
 
