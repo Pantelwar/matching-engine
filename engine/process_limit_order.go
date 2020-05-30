@@ -2,10 +2,12 @@ package engine
 
 import (
 	"github.com/Pantelwar/binarytree"
+	"github.com/shopspring/decimal"
 )
 
 // Process executes limit process
 func (ob *OrderBook) Process(order Order) ([]*Order, *Order) {
+	// fmt.Printf("%#v\n", order)
 	if order.Type == Buy {
 		// return ob.processOrderB(order)
 		return ob.commonProcess(order, ob.SellTree, ob.addBuyOrder, ob.removeSellNode)
@@ -22,6 +24,7 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 		maxNode = tree.Min()
 	}
 	if maxNode == nil {
+		// fmt.Println("adding node directly")
 		add(order)
 		// ob.addSellOrder(order)
 		// return trades, nil, nil
@@ -40,7 +43,7 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 		}
 		if maxNode == nil || noMoreOrders {
 			if order.Amount > 0 {
-				// fmt.Println("adding sell node pending")
+				// fmt.Println("adding sell node pending", order.Amount)
 				add(order)
 				//ob.addSellOrder(order)
 				break
@@ -83,7 +86,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 		// return trades, noMoreOrders, nil, nil
 		return noMoreOrders, nil, nil
 	}
-	countAdd := 0.0
+	// countAdd := 0.0
 	for maxNode == nil || order.Amount > 0 {
 		if order.Type == Sell {
 			maxNode = tree.Max()
@@ -130,14 +133,22 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				}
 			}
 
-			countAdd += ele.Amount
+			// countAdd += ele.Amount
 			if ele.Amount > order.Amount {
 				nodeData.updateVolume(-order.Amount)
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
-				amount := ele.Amount - order.Amount
-				// amount = math.Floor(amount*100000000) / 100000000
-				ele.Amount = amount
+				// amount := ele.Amount - order.Amount
+				// // amount = math.Ceil(amount*100000000) / 100000000
+				// ele.Amount = amount
+
+				amount := decimal.NewFromFloat(ele.Amount).Sub(decimal.NewFromFloat(order.Amount))
+
+				ele.Amount, _ = amount.Float64()
+
+				// amount := new(big.Float).Sub(new(big.Float).SetFloat64(ele.Amount), new(big.Float).SetFloat64(order.Amount))
+
+				// ele.Amount, _ = amount.Float64()
 
 				partialOrder = NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price)
 				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, order.Amount, order.Price))
@@ -147,8 +158,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				order.Amount = 0.0
 				noMoreOrders = true
 				break
-			}
-			if ele.Amount == order.Amount {
+			} else if ele.Amount == order.Amount {
 				nodeData.updateVolume(-order.Amount)
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
@@ -173,7 +183,18 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: ele.Amount, Price: ele.Price})
 
-				order.Amount -= ele.Amount
+				amount := decimal.NewFromFloat(order.Amount).Sub(decimal.NewFromFloat(ele.Amount))
+
+				order.Amount, _ = amount.Float64()
+
+				// amount := new(big.Float).Sub(new(big.Float).SetFloat64(order.Amount), new(big.Float).SetFloat64(ele.Amount))
+
+				// order.Amount, _ = amount.Float64()
+
+				// amount := order.Amount - ele.Amount
+				// order.Amount -= ele.Amount
+				// order.Amount = math.Ceil(amount*100000000) / 100000000
+				// order.Amount, _ = decimal.NewFromFloat(order.Amount).Float64()
 
 				delete(ob.orders, ele.ID)
 

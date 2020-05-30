@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -179,6 +180,14 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
+				NewOrder("s2", Sell, 1.322, 7000.0),
+				NewOrder("b1", Buy, 5.134, 7000.0),
+			},
+			`------------------------------------------
+7000 -> 3.812
+`},
+		{
+			[]*Order{
 				NewOrder("s1", Sell, 5.134, 7000.0),
 				NewOrder("b2", Buy, 10.134, 6000.0),
 				NewOrder("s3", Sell, 1.32, 7000.0),
@@ -193,10 +202,13 @@ func TestString(t *testing.T) {
 	for _, tt := range tests {
 		ob := NewOrderBook()
 		for _, o := range tt.input {
-			ob.Process(*o)
+			a, b := ob.Process(*o)
+			fmt.Println(a, b)
 		}
 
 		if tt.output != ob.String() {
+			// b, _ := json.Marshal(ob)
+			// fmt.Println("book", string(b))
 			t.Fatalf("Book prints incorrect (have: \n%s, \nwant: \n%s\n)", ob.String(), tt.output)
 		}
 	}

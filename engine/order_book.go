@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math"
 
+	"strconv"
+
 	"github.com/Pantelwar/binarytree"
 )
 
@@ -24,8 +26,8 @@ type Book struct {
 }
 
 type orderinfo struct {
-	Price  float64 `json:"price"`
-	Amount float64 `json:"amount"`
+	Price  string `json:"price"`
+	Amount string `json:"amount"`
 }
 
 // // GetOrders ...
@@ -93,13 +95,13 @@ func (ob *OrderBook) MarshalJSON() ([]byte, error) {
 			// fmt.Println("    value", i)
 			var b orderinfo
 			// res := fmt.Sprintf("%#f -> ", i)
-			b.Price = i
+			b.Price = strconv.FormatFloat(i, 'f', -1, 64)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
 			// res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
-			b.Amount = subNode.Data.(*OrderNode).Volume
-			// fmt.Println("res b", res)
+			b.Amount = strconv.FormatFloat(subNode.Data.(*OrderNode).Volume, 'f', -1, 64)
+			fmt.Println("res b", b)
 			// orderSideBuy = append(orderSideBuy, res)
 			buys = append(buys, b)
 		})
@@ -115,14 +117,14 @@ func (ob *OrderBook) MarshalJSON() ([]byte, error) {
 			// fmt.Println("    value", i)
 			var b orderinfo
 			// res := fmt.Sprintf("%#f -> ", i)
-			b.Price = i
+			b.Price = strconv.FormatFloat(i, 'f', -1, 64)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
 			// res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
 			// fmt.Println("res", res)
-			b.Amount = subNode.Data.(*OrderNode).Volume
-			// fmt.Println("res b", res)
+			b.Amount = strconv.FormatFloat(subNode.Data.(*OrderNode).Volume, 'f', -1, 64)
+			fmt.Println("res b", b)
 			// orderSideBuy = append(orderSideBuy, res)
 			buys = append(sells, b)
 		})
@@ -148,22 +150,24 @@ func (ob *OrderBook) String() string {
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
 			// result = append(result, fmt.Sprintf("%#v", i))
 			// fmt.Println("    value", i)
-			res := fmt.Sprintf("%#f -> ", i)
+			res := strconv.FormatFloat(i, 'f', -1, 64) + " -> "
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
-			res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
+			res += strconv.FormatFloat(subNode.Data.(*OrderNode).Volume, 'f', -1, 64)
 			// fmt.Println("res", res)
 			orderSideSell = append(orderSideSell, res)
 		})
 	})
 	// fmt.Println()
 	// fmt.Println("sell orders")
+	sells := ""
 	for _, o := range orderSideSell {
 		// fmt.Println(o)
-		result += o + "\n"
+		sells = o + "\n" + sells
 	}
-	result += "------------------------------------------\n"
+
+	result = sells + "------------------------------------------\n"
 
 	var orderSideBuy []string
 	ob.BuyTree.Root.InOrderTraverse(func(i float64) {
@@ -173,11 +177,11 @@ func (ob *OrderBook) String() string {
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
 			// result = append(result, fmt.Sprintf("%#v", i))
 			// fmt.Println("    value", i)
-			res := fmt.Sprintf("%#f -> ", i)
+			res := strconv.FormatFloat(i, 'f', -1, 64) + " -> "
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			// fmt.Printf("subnode: %#v\n", subNode)
 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
-			res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
+			res += strconv.FormatFloat(subNode.Data.(*OrderNode).Volume, 'f', -1, 64)
 			// fmt.Println("res b", res)
 			orderSideBuy = append(orderSideBuy, res)
 		})

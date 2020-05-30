@@ -10,10 +10,10 @@ import (
 
 // Order describes the struct of the order
 type Order struct {
-	Amount float64 `json:"amount" validate:"gt=0"`
-	Price  float64 `json:"price" validate:"gt=0"`
-	ID     string  `json:"id" validate:"required"`
-	Type   Side    `json:"type"  validate:"side_validate"`
+	Amount float64 `json:"amount"` // validate:"gt=0"`
+	Price  float64 `json:"price"`  // validate:"gt=0"`
+	ID     string  `json:"id"`     // validate:"required"`
+	Type   Side    `json:"type"`   //  validate:"side_validate"`
 }
 
 func sideValidation(fl validator.FieldLevel) bool {
@@ -26,13 +26,13 @@ func sideValidation(fl validator.FieldLevel) bool {
 // NewOrder returns *Order
 func NewOrder(id string, orderType Side, amount, price float64) *Order {
 	o := &Order{ID: id, Type: orderType, Amount: amount, Price: price}
-	validate := validator.New()
-	validate.RegisterValidation("side_validate", sideValidation)
-	err := validate.Struct(o)
-	if err != nil {
-		fmt.Println("error", err)
-		return nil
-	}
+	// validate := validator.New()
+	// validate.RegisterValidation("side_validate", sideValidation)
+	// err := validate.Struct(o)
+	// if err != nil {
+	// 	fmt.Println("error", err)
+	// 	return nil
+	// }
 	return o //&Order{ID: id, Type: orderType, Amount: amount, Price: price}
 }
 
@@ -42,13 +42,13 @@ func (order *Order) FromJSON(msg []byte) error {
 	if err != nil {
 		return err
 	}
-	validate := validator.New()
-	validate.RegisterValidation("side_validate", sideValidation)
-	err = validate.Struct(order)
-	if err != nil {
-		fmt.Println("error", err)
-		return err
-	}
+	// validate := validator.New()
+	// validate.RegisterValidation("side_validate", sideValidation)
+	// err = validate.Struct(order)
+	// if err != nil {
+	// 	fmt.Println("error", err)
+	// 	return err
+	// }
 	return nil
 }
 
