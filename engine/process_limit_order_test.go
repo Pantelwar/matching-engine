@@ -3,8 +3,6 @@ package engine
 import (
 	"fmt"
 	"testing"
-
-	"github.com/shopspring/decimal"
 )
 
 func TestProcessLimitOrder(t *testing.T) {
@@ -16,74 +14,74 @@ func TestProcessLimitOrder(t *testing.T) {
 	}{
 		{
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("s2", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(8000.0)),
+			NewOrder("s2", Sell, DecimalBig("5.0"), DecimalBig("8000.0")),
 			[]*Order{},
 			nil,
 		},
 		{
 			[]*Order{
-				NewOrder("s2", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(8000.0)),
+				NewOrder("s2", Sell, DecimalBig("5.0"), DecimalBig("8000.0")),
 			},
-			NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			[]*Order{},
 			nil,
 		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("s2", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("s2", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("s2", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("s2", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
 			nil,
 		},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("b2", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("b2", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("b2", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
 			nil,
 		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("s2", Sell, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("s2", Sell, DecimalBig("1.0"), DecimalBig("7000.0")),
 			[]*Order{
-				NewOrder("s2", Sell, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("s2", Sell, DecimalBig("1.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("b1", Buy, decimal.NewFromFloat(4.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("b1", Buy, DecimalBig("4.0"), DecimalBig("7000.0")),
 		},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("b2", Buy, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("7000.0")),
 			[]*Order{
-				NewOrder("b2", Buy, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("s1", Sell, decimal.NewFromFloat(4.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("s1", Sell, DecimalBig("4.0"), DecimalBig("7000.0")),
 		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			},
-			NewOrder("s2", Sell, decimal.NewFromFloat(1.0), decimal.NewFromFloat(6000.0)),
+			NewOrder("s2", Sell, DecimalBig("1.0"), DecimalBig("6000.0")),
 			[]*Order{
-				NewOrder("s2", Sell, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("s2", Sell, DecimalBig("1.0"), DecimalBig("6000.0")),
 			},
-			NewOrder("b1", Buy, decimal.NewFromFloat(4.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("b1", Buy, DecimalBig("4.0"), DecimalBig("7000.0")),
 		},
 	}
 
@@ -98,7 +96,9 @@ func TestProcessLimitOrder(t *testing.T) {
 		processedOrder, partialOrder := ob.Process(*tt.input)
 		fmt.Println("result ", i, processedOrder, partialOrder)
 		for i, po := range processedOrder {
-			if *po != *tt.processedOrder[i] {
+			if po.String() != tt.processedOrder[i].String() {
+				fmt.Println(*po, *tt.processedOrder[i], *po == *tt.processedOrder[i])
+				fmt.Println(len(po.String()), len((tt.processedOrder[i].String())))
 				t.Fatalf("Incorrect processedOrder: (have: \n%s\n, want: \n%s\n)", processedOrder, tt.processedOrder)
 			}
 		}
@@ -109,7 +109,7 @@ func TestProcessLimitOrder(t *testing.T) {
 				t.Fatalf("Incorrect partialOrder: (have: \n%s\n, want: \n%s)", partialOrder, tt.partialOrder)
 			}
 		} else {
-			if *partialOrder != *tt.partialOrder {
+			if partialOrder.String() != tt.partialOrder.String() {
 				// fmt.Println(len(partialOrder.String()), len((tt.partialOrder.String())))
 				t.Fatalf("Incorrect partialOrder: (have: \n%s\n, want: \n%s)", partialOrder, tt.partialOrder)
 			}

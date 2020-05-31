@@ -5,27 +5,71 @@ import (
 	"testing"
 )
 
-func TestSide(t *testing.T) {
-	data := struct {
-		S Side `json:"side"`
-	}{}
+type testSide struct {
+	Type Side `json:"type"`
+}
 
-	data.S = Buy
-	resultBuy, _ := json.Marshal(data)
-	t.Log(string(resultBuy))
+func TestSideUnmarshal(t *testing.T) {
+	var tests = []struct {
+		input   string
+		err     string
+		message string
+	}{
+		{"{\"type\":\"buy\"}", "", "JSON should be approved"},
+		{"{\"type\":\"sell\"}", "", "JSON should be approved"},
+		{"{}", "err", "Empty JSON should not be passed"},
+		{"\"type\":\"random\"}", "err", "type should be either buy or sell"},
+	}
 
-	data.S = Sell
-	resultSell, _ := json.Marshal(&data)
-	t.Log(string(resultSell))
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			side := testSide{}
+			err := json.Unmarshal([]byte(tt.input), &side)
+			if tt.err == "" && err == nil {
+				t.Log("Successfully detecting error")
+			} else if tt.err != "" && err != nil {
+				t.Log("Successful detection of json")
+			} else {
+				if tt.err != "" && side.Type == "" {
+					t.Log("Successful detecting of empty json")
+				} else {
+					t.Fatal(tt.message)
+				}
+			}
+		})
+	}
+}
 
-	_ = json.Unmarshal(resultBuy, &data)
-	t.Log(data)
+func TestSideMarshal(t *testing.T) {
+	var tests = []struct {
+		input  Side
+		output string
+	}{
+		{Buy, "\"buy\""},
+		{Sell, "\"sell\""},
+	}
 
-	_ = json.Unmarshal(resultSell, &data)
-	t.Log(data)
+	for _, tt := range tests {
+		output, _ := json.Marshal(tt.input)
+		if string(output) != tt.output {
+			t.Fatalf("Marshal error: (have: %s, want: %s\n", string(output), tt.output)
+		}
+	}
+}
 
-	err := json.Unmarshal([]byte(`{"side":"fake"}`), &data)
-	if err == nil {
-		t.Fatal("can unmarshal unsupported value")
+func TestSideString(t *testing.T) {
+	var tests = []struct {
+		input  Side
+		output string
+	}{
+		{Buy, "buy"},
+		{Sell, "sell"},
+	}
+
+	for _, tt := range tests {
+		output := tt.input.String()
+		if string(output) != tt.output {
+			t.Fatalf("String error: (have: %s, want: %s)\n", string(output), tt.output)
+		}
 	}
 }

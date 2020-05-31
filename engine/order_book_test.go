@@ -5,30 +5,35 @@ import (
 	"testing"
 
 	"github.com/Pantelwar/binarytree"
-	"github.com/shopspring/decimal"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestNewOrderBook(t *testing.T) {
 	t.Log(NewOrderBook())
 }
 
+func DecimalBig(val string) *decimal.Big {
+	a, _ := new(decimal.Big).SetString(val)
+	return a
+}
+
 func TestAddOrderInBook(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("s2", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("s3", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("b4", Buy, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0))},
+		{NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0"))},
+		{NewOrder("s2", Sell, DecimalBig("10.0"), DecimalBig("7000.0"))},
+		{NewOrder("s3", Sell, DecimalBig("10.0"), DecimalBig("7000.0"))},
+		{NewOrder("b4", Buy, DecimalBig("1.0"), DecimalBig("7000.0"))},
 	}
+
 	ob := NewOrderBook()
 
 	for _, tt := range tests {
-		orderPrice, _ := tt.input.Price.Float64()
 		if tt.input.Type == Buy {
-			ob.addBuyOrder(*tt.input, orderPrice)
+			ob.addBuyOrder(*tt.input)
 		} else {
-			ob.addSellOrder(*tt.input, orderPrice)
+			ob.addSellOrder(*tt.input)
 		}
 
 		if ob.orders[tt.input.ID] == nil {
@@ -57,19 +62,18 @@ func TestRemoveOrderNodeFromBook(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("s2", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("s3", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("b4", Buy, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0))},
+		{NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0"))},
+		{NewOrder("s2", Sell, DecimalBig("10.0"), DecimalBig("7000.0"))},
+		{NewOrder("s3", Sell, DecimalBig("10.0"), DecimalBig("7000.0"))},
+		{NewOrder("b4", Buy, DecimalBig("1.0"), DecimalBig("7000.0"))},
 	}
 	ob := NewOrderBook()
 
 	for _, tt := range tests {
-		orderPrice, _ := tt.input.Price.Float64()
 		if tt.input.Type == Buy {
-			ob.addBuyOrder(*tt.input, orderPrice)
+			ob.addBuyOrder(*tt.input)
 		} else {
-			ob.addSellOrder(*tt.input, orderPrice)
+			ob.addSellOrder(*tt.input)
 		}
 	}
 
@@ -105,19 +109,18 @@ func TestRemoveOrderFromBook(t *testing.T) {
 	var tests = []struct {
 		input *Order
 	}{
-		{NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("s2", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("s3", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0))},
-		{NewOrder("b4", Buy, decimal.NewFromFloat(1.0), decimal.NewFromFloat(7000.0))},
+		{NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0"))},
+		{NewOrder("s2", Sell, DecimalBig("10.0"), DecimalBig("7000.0"))},
+		{NewOrder("s3", Sell, DecimalBig("10.0"), DecimalBig("7000.0"))},
+		{NewOrder("b4", Buy, DecimalBig("1.0"), DecimalBig("7000.0"))},
 	}
 	ob := NewOrderBook()
 
 	for _, tt := range tests {
-		orderPrice, _ := tt.input.Price.Float64()
 		if tt.input.Type == Buy {
-			ob.addBuyOrder(*tt.input, orderPrice)
+			ob.addBuyOrder(*tt.input) //, orderPrice)
 		} else {
-			ob.addSellOrder(*tt.input, orderPrice)
+			ob.addSellOrder(*tt.input) //, orderPrice)
 		}
 	}
 
@@ -139,16 +142,16 @@ func TestString(t *testing.T) {
 	}{
 		{
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("b2", Buy, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("10.0"), DecimalBig("7000.0")),
 			},
 			`------------------------------------------
 7000 -> 15
 `},
 		{
 			[]*Order{
-				NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("b2", Buy, decimal.NewFromFloat(10.0), decimal.NewFromFloat(8000.0)),
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("10.0"), DecimalBig("8000.0")),
 			},
 			`------------------------------------------
 8000 -> 10
@@ -156,16 +159,16 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("s2", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0)),
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("s2", Sell, DecimalBig("10.0"), DecimalBig("7000.0")),
 			},
 			`7000 -> 15
 ------------------------------------------
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("s2", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(8000.0)),
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("s2", Sell, DecimalBig("10.0"), DecimalBig("8000.0")),
 			},
 			`8000 -> 10
 7000 -> 5
@@ -173,10 +176,10 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
-				NewOrder("b2", Buy, decimal.NewFromFloat(10.0), decimal.NewFromFloat(6000.0)),
-				NewOrder("s3", Sell, decimal.NewFromFloat(1.0), decimal.NewFromFloat(8000.0)),
-				NewOrder("b4", Buy, decimal.NewFromFloat(2.0), decimal.NewFromFloat(6500.0)),
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("10.0"), DecimalBig("6000.0")),
+				NewOrder("s3", Sell, DecimalBig("1.0"), DecimalBig("8000.0")),
+				NewOrder("b4", Buy, DecimalBig("2.0"), DecimalBig("6500.0")),
 			},
 			`8000 -> 1
 7000 -> 5
@@ -186,10 +189,10 @@ func TestString(t *testing.T) {
 `},
 		{
 			[]*Order{
-				NewOrder("s1", Sell, decimal.NewFromFloat(5.134), decimal.NewFromFloat(7000.0)),
-				NewOrder("b2", Buy, decimal.NewFromFloat(10.134), decimal.NewFromFloat(6000.0)),
-				NewOrder("s3", Sell, decimal.NewFromFloat(1.32), decimal.NewFromFloat(7000.0)),
-				NewOrder("b4", Buy, decimal.NewFromFloat(2.1278), decimal.NewFromFloat(6000.0)),
+				NewOrder("s1", Sell, DecimalBig("5.134"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("10.134"), DecimalBig("6000.0")),
+				NewOrder("s3", Sell, DecimalBig("1.32"), DecimalBig("7000.0")),
+				NewOrder("b4", Buy, DecimalBig("2.1278"), DecimalBig("6000.0")),
 			},
 			`7000 -> 6.454
 ------------------------------------------
