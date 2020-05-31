@@ -1,21 +1,20 @@
 package engine
 
 import (
+	"fmt"
 	"testing"
-
-	"github.com/shopspring/decimal"
 )
 
 func TestNewOrder(t *testing.T) {
-	t.Log(NewOrder("b1", Sell, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)))
+	t.Log(NewOrder("b1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")))
 }
 
 func TestToJSON(t *testing.T) {
-	order := NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0))
+	order := NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0"))
 
 	result, _ := order.ToJSON()
-	if string(result) != "{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}" {
-		t.Fatal("Result should be: {\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}, got: " + string(result))
+	if string(result) != "{\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"buy\"}" {
+		t.Fatal("Result should be: {\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"buy\"}, got: " + string(result))
 	}
 }
 
@@ -25,22 +24,26 @@ func TestFromJSON(t *testing.T) {
 		err     string
 		message string
 	}{
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "", "JSON should be approved"},
+		{"{\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"buy\"}", "", "JSON should be approved"},
 
 		{"{}", "err", "Empty JSON should not be passed"},
-		{"{\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for amount key"},
-		{"{\"amount\":5,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for price key"},
-		{"{\"amount\":5,\"price\":7000,\"type\":\"buy\"}", "err", "Check for id key"},
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\"}", "err", "Check for type key"},
+		{"{\"price\":\"0.0\",\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for amount key"},
+		{"{\"amount\":\"5.0\",\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for price key"},
+		{"{\"amount\":\"5.0\",\"price\":\"7000.0\",\"type\":\"buy\"}", "err", "Check for id key"},
+		{"{\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\"}", "err", "Check for type key"},
 
-		{"{\"amount\":5,\"price\":7000,\"id\":\"b1\",\"type\":\"random\"}", "err", "Check for valid type"},
-		{"{\"amount\":0,\"price\":7000,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid amount"},
-		{"{\"amount\":5,\"price\":0,\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid price"},
+		{"{\"amount\":\"0.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid amount"},
+		{"{\"amount\":\"5.0\",\"price\":\"0.0\",\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid price"},
+
+		{"{\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"random\"}", "err", "Check for valid type"},
+		{"{\"amount\":\"random\",\"price\":\"0.0\",\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid amount"},
+		{"{\"amount\":\"0.0\",\"price\":\"random\",\"id\":\"b1\",\"type\":\"buy\"}", "err", "Check for valid price"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			order := &Order{}
 			err := order.FromJSON([]byte(tt.input))
+			fmt.Println("error:", err)
 			if tt.err == "" && err == nil {
 				t.Log("Successfully detecting error")
 			} else if tt.err != "" && err != nil {
@@ -58,14 +61,14 @@ func TestOrderString(t *testing.T) {
 		output string
 	}{
 		{
-			NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)),
+			NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
 			`"b1":
 	side: buy
 	quantity: 5
 	price: 7000
 `},
 		{
-			NewOrder("s1", Sell, decimal.NewFromFloat(5.124), decimal.NewFromFloat(9000.0)),
+			NewOrder("s1", Sell, DecimalBig("5.124"), DecimalBig("9000.0")),
 			`"s1":
 	side: sell
 	quantity: 5.124

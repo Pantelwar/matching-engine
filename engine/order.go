@@ -2,18 +2,20 @@ package engine
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 
-	"github.com/shopspring/decimal"
+	"github.com/ericlagergren/decimal"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 // Order describes the struct of the order
 type Order struct {
-	Amount decimal.Decimal `json:"amount"` // validate:"gt=0"`
-	Price  decimal.Decimal `json:"price"`  // validate:"gt=0"`
-	ID     string          `json:"id"`     // validate:"required"`
-	Type   Side            `json:"type"`   //  validate:"side_validate"`
+	Amount *decimal.Big `json:"amount"` // validate:"gt=0"`
+	Price  *decimal.Big `json:"price"`  // validate:"gt=0"`
+	ID     string       `json:"id"`     // validate:"required"`
+	Type   Side         `json:"type"`   //  validate:"side_validate"`
 }
 
 func sideValidation(fl validator.FieldLevel) bool {
@@ -24,16 +26,9 @@ func sideValidation(fl validator.FieldLevel) bool {
 }
 
 // NewOrder returns *Order
-func NewOrder(id string, orderType Side, amount, price decimal.Decimal) *Order {
+func NewOrder(id string, orderType Side, amount, price *decimal.Big) *Order {
 	o := &Order{ID: id, Type: orderType, Amount: amount, Price: price}
-	// validate := validator.New()
-	// validate.RegisterValidation("side_validate", sideValidation)
-	// err := validate.Struct(o)
-	// if err != nil {
-	// 	fmt.Println("error", err)
-	// 	return nil
-	// }
-	return o //&Order{ID: id, Type: orderType, Amount: amount, Price: price}
+	return o
 }
 
 // FromJSON create the Order struct from json string
@@ -42,13 +37,6 @@ func (order *Order) FromJSON(msg []byte) error {
 	if err != nil {
 		return err
 	}
-	// validate := validator.New()
-	// validate.RegisterValidation("side_validate", sideValidation)
-	// err = validate.Struct(order)
-	// if err != nil {
-	// 	fmt.Println("error", err)
-	// 	return err
-	// }
 	return nil
 }
 
@@ -60,25 +48,54 @@ func (order *Order) ToJSON() ([]byte, error) {
 
 // String implements Stringer interface
 func (order *Order) String() string {
-	return fmt.Sprintf("\"%s\":\n\tside: %v\n\tquantity: %s\n\tprice: %s\n", order.ID, order.Type, order.Amount.String(), order.Price.String())
+	amount, _ := order.Amount.Float64()
+	price, _ := order.Price.Float64()
+
+	return fmt.Sprintf("\"%s\":\n\tside: %v\n\tquantity: %s\n\tprice: %s\n", order.ID, order.Type, strconv.FormatFloat(amount, 'f', -1, 64), strconv.FormatFloat(price, 'f', -1, 64))
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface
 func (order *Order) UnmarshalJSON(data []byte) error {
 	obj := struct {
-		Type   Side    `json:"type"`
-		ID     string  `json:"id"`
-		Amount float64 `json:"amount"`
-		Price  float64 `json:"price"`
+		Type   Side   `json:"type"`   // validate:"side_validate"`
+		ID     string `json:"id"`     // validate:"required"`
+		Amount string `json:"amount"` // validate:"required"`
+		Price  string `json:"price"`  // validate:"required"`
 	}{}
 
 	if err := json.Unmarshal(data, &obj); err != nil {
+		fmt.Println("Damn errr", err)
 		return err
+	}
+
+	if obj.ID == "" {
+		return errors.New("ID is not present")
+	}
+	if obj.Type == "" {
+		return errors.New("Invalid order type")
+	}
+
+	var ok bool
+	order.Price, ok = new(decimal.Big).SetString(obj.Price) //.Quantize(8)
+	if !ok {
+		fmt.Println("price", order.Price, ok)
+		return errors.New("Invalid order price")
+	}
+	order.Amount, ok = new(decimal.Big).SetString(obj.Amount) //.Quantize(8)
+	if !ok {
+		return errors.New("Invalid order amount")
 	}
 
 	order.Type = obj.Type
 	order.ID = obj.ID
-	order.Price = decimal.NewFromFloat(obj.Price)
-	order.Amount = decimal.NewFromFloat(obj.Amount)
+
+	price, _ := order.Price.Float64()
+	if price <= 0 {
+		return errors.New("Order price should be greater than zero")
+	}
+	amount, _ := order.Amount.Float64()
+	if amount <= 0 {
+		return errors.New("Order amount should be greater than zero")
+	}
 	return nil
 }

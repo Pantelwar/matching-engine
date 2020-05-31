@@ -3,8 +3,6 @@ package engine
 import (
 	"fmt"
 	"testing"
-
-	"github.com/shopspring/decimal"
 )
 
 func TestNewOrderType(t *testing.T) {
@@ -16,10 +14,10 @@ func TestAddOrderInQueue(t *testing.T) {
 		input *Order
 		err   bool
 	}{
-		{NewOrder("b1", Buy, decimal.NewFromFloat(5.0), decimal.NewFromFloat(7000.0)), true},
-		{NewOrder("s2", Sell, decimal.NewFromFloat(10.0), decimal.NewFromFloat(7000.0)), false},
-		{NewOrder("b3", Buy, decimal.NewFromFloat(11.0), decimal.NewFromFloat(8000.0)), true},
-		{NewOrder("s4", Sell, decimal.NewFromFloat(2.0), decimal.NewFromFloat(10000.0)), false},
+		{NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")), true},
+		{NewOrder("s2", Sell, DecimalBig("10.0"), DecimalBig("7000.0")), false},
+		{NewOrder("b3", Buy, DecimalBig("11.0"), DecimalBig("8000.0")), true},
+		{NewOrder("s4", Sell, DecimalBig("2.0"), DecimalBig("10000.0")), false},
 	}
 	ot := NewOrderType("sell")
 	for _, tt := range tests {

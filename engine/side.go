@@ -40,6 +40,8 @@ func (s *Side) UnmarshalJSON(data []byte) error {
 func (s Side) String() string {
 	if s == Buy {
 		return "buy"
+	} else if s == Sell {
+		return "sell"
 	}
-	return "sell"
+	return ""
 }
