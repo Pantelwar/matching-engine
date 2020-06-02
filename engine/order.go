@@ -99,3 +99,20 @@ func (order *Order) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
+
+// MarshalJSON implements json.Marshaler interface
+func (order *Order) MarshalJSON() ([]byte, error) {
+	return json.Marshal(
+		&struct {
+			Type   string `json:"type"`
+			ID     string `json:"id"`
+			Amount string `json:"amount"`
+			Price  string `json:"price"`
+		}{
+			Type:   order.Type.String(),
+			ID:     order.ID,
+			Amount: order.Amount.String(),
+			Price:  order.Price.String(),
+		},
+	)
+}
