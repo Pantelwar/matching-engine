@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+service Engine {
+    rpc Process(Order) returns (OutputOrders); 
+}
+
+message Order {
+    Side Type = 1 [json_name = "type"];
+    string ID  = 2 [json_name = "id"];
+    string Amount = 3 [json_name = "amount"];
+    string Price = 4 [json_name = "price"];
+}
+
+message OutputOrders {
+    string  OrdersProcessed = 1 [json_name = "orders_processed"];
+    string PartialOrder = 2 [json_name = "partial_order"];
+}
+
+enum Side {
+    buy = 0;
+    sell = 1;
+}
