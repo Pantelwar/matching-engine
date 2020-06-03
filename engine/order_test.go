@@ -10,11 +10,20 @@ func TestNewOrder(t *testing.T) {
 }
 
 func TestToJSON(t *testing.T) {
-	order := NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0"))
+	var tests = []struct {
+		input  *Order
+		output string
+	}{
+		{NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")), `{"type":"buy","id":"b1","amount":"5.0","price":"7000.0"}`},
+		{NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")), `{"type":"sell","id":"s1","amount":"5.0","price":"7000.0"}`},
+	}
 
-	result, _ := order.ToJSON()
-	if string(result) != "{\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"buy\"}" {
-		t.Fatal("Result should be: {\"amount\":\"5.0\",\"price\":\"7000.0\",\"id\":\"b1\",\"type\":\"buy\"}, got: " + string(result))
+	for _, tt := range tests {
+		result, _ := tt.input.ToJSON()
+
+		if string(result) != tt.output {
+			t.Fatalf("Unable to marshal json (have: %s, want: %s)\n", string(result), tt.output)
+		}
 	}
 }
 
