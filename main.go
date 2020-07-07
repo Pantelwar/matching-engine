@@ -18,10 +18,12 @@ func main() {
 
 	reflection.Register(gs)
 
-	l, err := net.Listen("tcp", ":9092")
+	l, err := net.Listen("tcp", ":9093")
 	if err != nil {
-		_ = fmt.Errorf("Unable to listen server, err: %v", err)
+		e := fmt.Errorf("Unable to listen server, err: %v", err)
+		fmt.Println("err", e)
 		os.Exit(1)
 	}
+	fmt.Println("grpc server listening to :9093")
 	gs.Serve(l)
 }
