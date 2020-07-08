@@ -17,13 +17,11 @@ func main() {
 	engineGrpc.RegisterEngineServer(gs, cs)
 
 	reflection.Register(gs)
-
-	l, err := net.Listen("tcp", ":9093")
+  
+	l, err := net.Listen("tcp", ":9092")
 	if err != nil {
-		e := fmt.Errorf("Unable to listen server, err: %v", err)
-		fmt.Println("err", e)
+		_ = fmt.Errorf("Unable to listen server, err: %v", err)
 		os.Exit(1)
 	}
-	fmt.Println("grpc server listening to :9093")
 	gs.Serve(l)
 }
