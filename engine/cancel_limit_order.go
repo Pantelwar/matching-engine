@@ -15,7 +15,9 @@ func (ob *OrderBook) CancelOrder(id string) *Order {
 			if len(orderNode.Orders) == 0 {
 				ob.removeOrder(order)
 			}
+			ob.mutex.Lock()
 			delete(ob.orders, id)
+			ob.mutex.Unlock()
 			return order
 		}
 	}

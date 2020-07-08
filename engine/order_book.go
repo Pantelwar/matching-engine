@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"sync"
 
 	"github.com/Pantelwar/binarytree"
 	"github.com/ericlagergren/decimal"
@@ -17,6 +18,7 @@ type OrderBook struct {
 	SellTree        *binarytree.BinaryTree
 	orderLimitRange int
 	orders          map[string]*OrderNode // orderID -> *Order (*list.Element.Value.(*Order))
+	mutex           *sync.Mutex
 }
 
 // Book ...
@@ -209,6 +211,7 @@ func NewOrderBook() *OrderBook {
 		SellTree:        sTree,
 		orderLimitRange: 100,
 		orders:          make(map[string]*OrderNode),
+		mutex:           &sync.Mutex{},
 	}
 }
 
@@ -243,7 +246,9 @@ func (ob *OrderBook) addBuyOrder(order Order) {
 		ob.BuyTree.Insert(searchNodePrice, orderTypeObj)
 	}
 	// fmt.Println("ors", orderNode)
+	ob.mutex.Lock()
 	ob.orders[order.ID] = orderNode
+	ob.mutex.Unlock()
 }
 
 // addSellOrder a buy order to the order book
@@ -276,7 +281,9 @@ func (ob *OrderBook) addSellOrder(order Order) {
 		orderNode, _ = orderTypeObj.AddOrderInQueue(order)
 		ob.SellTree.Insert(searchNodePrice, orderTypeObj)
 	}
+	ob.mutex.Lock()
 	ob.orders[order.ID] = orderNode
+	ob.mutex.Unlock()
 }
 
 func (ob *OrderBook) removeBuyNode(key float64) error {

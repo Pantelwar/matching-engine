@@ -161,7 +161,9 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				// orderComplete = true
 
 				// ele.Amount = 0
+				ob.mutex.Lock()
 				delete(ob.orders, ele.ID)
+				ob.mutex.Unlock()
 
 				break
 			} else {
@@ -174,8 +176,9 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree) (bo
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: ele.Amount, Price: ele.Price})
 
 				order.Amount = new(decimal.Big).Sub(order.Amount, ele.Amount)
+				ob.mutex.Lock()
 				delete(ob.orders, ele.ID)
-
+				ob.mutex.Unlock()
 			}
 		}
 

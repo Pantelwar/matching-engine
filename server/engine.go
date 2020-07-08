@@ -24,7 +24,6 @@ func NewEngine() *Engine {
 
 // Process implements EngineServer interface
 func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrpc.OutputOrders, error) {
-	fmt.Println("process", req.GetPrice(), req.GetAmount(), req.GetID(), req.GetType())
 	bigZero, _ := new(decimal.Big).SetString("0.0")
 	orderString := fmt.Sprintf("{\"id\":\"%s\", \"type\": \"%s\", \"amount\": \"%s\", \"price\": \"%s\" }", req.GetID(), req.GetType(), req.GetAmount(), req.GetPrice())
 
