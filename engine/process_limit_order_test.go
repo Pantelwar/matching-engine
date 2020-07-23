@@ -83,6 +83,21 @@ func TestProcessLimitOrder(t *testing.T) {
 			},
 			NewOrder("b1", Buy, DecimalBig("4.0"), DecimalBig("7000.0")),
 		},
+
+		////////////////////////////////////////////////////////////////////////
+		{
+			[]*Order{
+				NewOrder("b1", Buy, DecimalBig("1.0"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("6000.0")),
+			},
+			NewOrder("s3", Sell, DecimalBig("2.0"), DecimalBig("6000.0")),
+			[]*Order{
+				NewOrder("b1", Buy, DecimalBig("1.0"), DecimalBig("7000.0")),
+				NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("6000.0")),
+				NewOrder("s3", Sell, DecimalBig("2.0"), DecimalBig("6000.0")),
+			},
+			nil,
+		},
 	}
 
 	for i, tt := range tests {
