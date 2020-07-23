@@ -58,6 +58,6 @@ func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrp
 		partialOrderString, err = json.Marshal(partialOrder)
 		return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: string(partialOrderString)}, nil
 	}
-	return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: ""}, nil
+	return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: "null"}, nil
 
 }
