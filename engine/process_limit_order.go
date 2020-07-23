@@ -141,7 +141,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree, ord
 				ele.Amount = amount
 
 				partialOrder = NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price)
-				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, order.Amount, order.Price))
+				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, orderOriginalAmount, order.Price))
 
 				maxNode.SetData(nodeData)
 
