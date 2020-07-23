@@ -24,8 +24,7 @@ func main() {
 
 	l, err := net.Listen("tcp", port)
 	if err != nil {
-		e := fmt.Errorf("Unable to listen server, err: %v", err)
-		fmt.Println("err", e)
+		_ = fmt.Errorf("Unable to listen server, err: %v", err)
 		os.Exit(1)
 	}
 	fmt.Printf("grpc server listening to %s\n", port)
