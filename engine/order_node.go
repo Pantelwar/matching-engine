@@ -18,8 +18,24 @@ func NewOrderNode() *OrderNode {
 
 // addOrder adds order to node
 func (on *OrderNode) addOrder(order Order) {
-	on.updateVolume(order.Amount)
-	on.Orders = append(on.Orders, &order)
+	found := false
+	for _, o := range on.Orders {
+		if o.ID == order.ID {
+			if o.Amount != order.Amount {
+				on.updateVolume(new(decimal.Big).Neg(o.Amount))
+				o.Amount = order.Amount
+				o.Price = order.Price
+				on.updateVolume(o.Amount)
+			}
+			found = true
+			break
+		}
+	}
+	if !found {
+		on.updateVolume(order.Amount)
+		on.Orders = append(on.Orders, &order)
+	}
+	// fmt.Printf("on.ORderNode: %v", on.Orders)
 }
 
 // updateVolume updates volume
