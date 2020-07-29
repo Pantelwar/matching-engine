@@ -58,5 +58,37 @@ func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrp
 		return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: string(partialOrderString)}, nil
 	}
 	return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: "null"}, nil
+}
 
+// Cancel implements EngineServer interface
+func (e *Engine) Cancel(ctx context.Context, req *engineGrpc.Order) (*engineGrpc.Order, error) {
+	// orderString := fmt.Sprintf("{\"id\":\"%s\"}", req.GetID())
+
+	order := &engine.Order{ID: req.GetID()}
+	// decode the message
+	// fmt.Printf("Orderstring =: %#v\n", order)
+	// err := order.FromJSON([]byte(orderString))
+	// if err != nil {
+	// 	fmt.Println("JSON Parse Error =: ", err)
+	// 	return nil, err
+	// }
+
+	if order.ID == "" {
+		fmt.Println("Invalid JSON")
+		return nil, errors.New("Invalid JSON")
+	}
+
+	order = e.book.CancelOrder(order.ID)
+
+	fmt.Println(e.book)
+	orderEngine := &engineGrpc.Order{}
+
+	orderEngine.ID = order.ID
+	orderEngine.Amount = order.Amount.String()
+	orderEngine.Price = order.Price.String()
+	orderEngine.Type = engineGrpc.Side(engineGrpc.Side_value[order.Type.String()])
+
+	// fmt.Printf("\nordersProcessed: %v, \n\npartialOrder: %v\n", ordersProcessed, partialOrder)
+
+	return orderEngine, nil
 }
