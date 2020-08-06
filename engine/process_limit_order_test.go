@@ -84,6 +84,16 @@ func TestProcessLimitOrder(t *testing.T) {
 			NewOrder("b1", Buy, DecimalBig("4.0"), DecimalBig("7000.0")),
 		},
 
+		{
+			[]*Order{
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+			},
+			NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("8000.0")),
+			[]*Order{
+				NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("8000.0")),
+			},
+			NewOrder("s1", Sell, DecimalBig("4.0"), DecimalBig("7000.0")),
+		},
 		////////////////////////////////////////////////////////////////////////
 		{
 			[]*Order{
@@ -111,6 +121,31 @@ func TestProcessLimitOrder(t *testing.T) {
 			},
 			NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("6000.0")),
 		},
+
+		//////////////////////////////////////////////////////////////////////
+		{
+			[]*Order{
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
+			},
+			NewOrder("s2", Sell, DecimalBig("6.0"), DecimalBig("6000.0")),
+			[]*Order{
+				NewOrder("b1", Buy, DecimalBig("5.0"), DecimalBig("7000.0")),
+			},
+			NewOrder("s2", Sell, DecimalBig("1.0"), DecimalBig("6000.0")),
+		},
+		{
+			[]*Order{
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+			},
+			NewOrder("b2", Buy, DecimalBig("6.0"), DecimalBig("8000.0")),
+			[]*Order{
+				NewOrder("s1", Sell, DecimalBig("5.0"), DecimalBig("7000.0")),
+			},
+			NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("8000.0")),
+		},
+
+		////////////////////////////////////////////////////////////////////////
+
 	}
 
 	for i, tt := range tests {

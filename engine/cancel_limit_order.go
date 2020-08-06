@@ -3,8 +3,11 @@ package engine
 // CancelOrder remove the order from book and returns
 func (ob *OrderBook) CancelOrder(id string) *Order {
 	orderNode := ob.orders[id]
-	// fmt.Printf("orderNode: %v\n", orderNode.Orders)
-	// orderNode.Orders = []*Order{}
+
+	if orderNode == nil {
+		return nil
+	}
+
 	for i, order := range orderNode.Orders {
 		if order.ID == id {
 			// ob.orders[id].addOrder(*order)
