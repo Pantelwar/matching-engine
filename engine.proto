@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service Engine {
     rpc Process(Order) returns (OutputOrders); 
+    rpc ProcessMarket(Order) returns (OutputOrders); 
     rpc Cancel(Order) returns (Order); 
 }
 
