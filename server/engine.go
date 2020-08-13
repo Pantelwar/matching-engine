@@ -14,12 +14,12 @@ import (
 
 // Engine ...
 type Engine struct {
-	book *engine.OrderBook
+	book map[string]*engine.OrderBook
 }
 
 // NewEngine returns Engine object
 func NewEngine() *Engine {
-	return &Engine{book: engine.NewOrderBook()}
+	return &Engine{book: map[string]*engine.OrderBook{}}
 }
 
 // Process implements EngineServer interface
@@ -41,11 +41,27 @@ func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrp
 		return nil, errors.New("Invalid JSON")
 	}
 
-	ordersProcessed, partialOrder := e.book.Process(order)
+	if req.GetPair() == "" {
+		fmt.Println("Invalid pair")
+		return nil, errors.New("Invalid pair")
+	}
+
+	var pairBook *engine.OrderBook
+	if val, ok := e.book[req.GetPair()]; ok {
+		pairBook = val
+	} else {
+		pairBook = engine.NewOrderBook()
+		e.book[req.GetPair()] = pairBook
+	}
+
+	ordersProcessed, partialOrder := pairBook.Process(order)
 
 	ordersProcessedString, err := json.Marshal(ordersProcessed)
 
-	fmt.Println(e.book)
+	// if order.Type.String() == "sell" {
+	fmt.Println("pair:", req.GetPair())
+	fmt.Println(pairBook)
+	// }
 
 	if err != nil {
 		return nil, err
@@ -68,9 +84,23 @@ func (e *Engine) Cancel(ctx context.Context, req *engineGrpc.Order) (*engineGrpc
 		return nil, errors.New("Invalid JSON")
 	}
 
-	order = e.book.CancelOrder(order.ID)
+	if req.GetPair() == "" {
+		fmt.Println("Invalid pair")
+		return nil, errors.New("Invalid pair")
+	}
 
-	fmt.Println(e.book)
+	var pairBook *engine.OrderBook
+	if val, ok := e.book[req.GetPair()]; ok {
+		pairBook = val
+	} else {
+		pairBook = engine.NewOrderBook()
+		e.book[req.GetPair()] = pairBook
+	}
+
+	order = pairBook.CancelOrder(order.ID)
+
+	fmt.Println("pair:", req.GetPair())
+	fmt.Println(pairBook)
 
 	if order == nil {
 		return nil, errors.New("NoOrderPresent")
@@ -105,12 +135,26 @@ func (e *Engine) ProcessMarket(ctx context.Context, req *engineGrpc.Order) (*eng
 		return nil, errors.New("Invalid JSON")
 	}
 
-	ordersProcessed, partialOrder := e.book.ProcessMarket(order)
+	if req.GetPair() == "" {
+		fmt.Println("Invalid pair")
+		return nil, errors.New("Invalid pair")
+	}
+
+	var pairBook *engine.OrderBook
+	if val, ok := e.book[req.GetPair()]; ok {
+		pairBook = val
+	} else {
+		pairBook = engine.NewOrderBook()
+		e.book[req.GetPair()] = pairBook
+	}
+
+	ordersProcessed, partialOrder := pairBook.ProcessMarket(order)
 
 	ordersProcessedString, err := json.Marshal(ordersProcessed)
 
 	// if order.Type.String() == "sell" {
-	fmt.Println(e.book)
+	fmt.Println("pair:", req.GetPair())
+	fmt.Println(pairBook)
 	// }
 
 	if err != nil {
