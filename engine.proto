@@ -11,6 +11,7 @@ message Order {
     string ID  = 2 [json_name = "id"];
     string Amount = 3 [json_name = "amount"];
     string Price = 4 [json_name = "price"];
+    string Pair = 5 [json_name = "pair"];
 }
 
 message OutputOrders {
