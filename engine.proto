@@ -3,7 +3,8 @@ syntax = "proto3";
 service Engine {
     rpc Process(Order) returns (OutputOrders); 
     rpc ProcessMarket(Order) returns (OutputOrders); 
-    rpc Cancel(Order) returns (Order); 
+    rpc Cancel(Order) returns (Order);
+    rpc FetchBook(BookInput) returns (BookOutput);
 }
 
 message Order {
@@ -22,4 +23,17 @@ message OutputOrders {
 enum Side {
     buy = 0;
     sell = 1;
+}
+
+message BookInput {
+    string pair = 1;
+}
+
+message BookArray {
+    repeated string price_amount = 1;
+}
+
+message BookOutput {
+    repeated BookArray Buys = 1; 
+    repeated BookArray Sells = 2; 
 }
