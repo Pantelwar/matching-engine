@@ -32,58 +32,6 @@ type orderinfo struct {
 	Amount *decimal.Big `json:"amount"`
 }
 
-// // GetOrders ...
-// func (ob *OrderBook) GetOrders() Book {
-// 	buys := []orderinfo{}
-// 	// var orderSideBuy []string
-// 	ob.BuyTree.Root.InOrderTraverse(func(i float64) {
-// 		// result = append(result, fmt.Sprintf("%#v", i))
-// 		// fmt.Println("Key", i)
-// 		node := ob.BuyTree.Root.SearchSubTree(i)
-// 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
-// 			// result = append(result, fmt.Sprintf("%#v", i))
-// 			// fmt.Println("    value", i)
-// 			var b orderinfo
-// 			// res := fmt.Sprintf("%#f -> ", i)
-// 			b.Price = i
-// 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
-// 			// fmt.Printf("subnode: %#v\n", subNode)
-// 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
-// 			// res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
-// 			b.Amount = subNode.Data.(*OrderNode).Volume
-// 			// fmt.Println("res b", res)
-// 			// orderSideBuy = append(orderSideBuy, res)
-// 			buys = append(buys, b)
-// 		})
-// 	})
-// 	sells := []orderinfo{}
-// 	ob.SellTree.Root.InOrderTraverse(func(i float64) {
-// 		// result = append(result, fmt.Sprintf("%#v", i))
-// 		// fmt.Println("Key lol", i)
-// 		node := ob.SellTree.Root.SearchSubTree(i)
-// 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
-// 			// result = append(result, fmt.Sprintf("%#v", i))
-// 			// fmt.Println("    value", i)
-// 			var b orderinfo
-// 			// res := fmt.Sprintf("%#f -> ", i)
-// 			b.Price = i
-// 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
-// 			// fmt.Printf("subnode: %#v\n", subNode)
-// 			// fmt.Printf("volume:%#v, %#v\n\n", subNode.Data.(*OrderNode).Volume, len(subNode.Data.(*OrderNode).Orders))
-// 			// res += fmt.Sprintf("%#f", subNode.Data.(*OrderNode).Volume)
-// 			// fmt.Println("res", res)
-// 			b.Amount = subNode.Data.(*OrderNode).Volume
-// 			// fmt.Println("res b", res)
-// 			// orderSideBuy = append(orderSideBuy, res)
-// 			buys = append(sells, b)
-// 		})
-// 	})
-// 	return Book{
-// 		Buys:  buys,
-// 		Sells: sells,
-// 	}
-// }
-
 // MarshalJSON implements json.Marshaler interface
 func (ob *OrderBook) MarshalJSON() ([]byte, error) {
 	buys := []orderinfo{}
@@ -139,6 +87,49 @@ func (ob *OrderBook) MarshalJSON() ([]byte, error) {
 			Sells: sells,
 		},
 	)
+}
+
+// BookArray ...
+type BookArray struct {
+	Buys  [][]string `json:"buys"`
+	Sells [][]string `json:"sells"`
+}
+
+// GetOrders implements json.Marshaler interface
+func (ob *OrderBook) GetOrders() *BookArray {
+	buys := [][]string{}
+	ob.BuyTree.Root.InOrderTraverse(func(i float64) {
+		node := ob.BuyTree.Root.SearchSubTree(i)
+		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
+			var b []string
+			price := new(decimal.Big).SetFloat64(i)
+			b = append(b, price.String())
+			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
+			amount := subNode.Data.(*OrderNode).Volume
+			b = append(b, amount.String())
+			buys = append(buys, b)
+		})
+	})
+
+	sells := [][]string{}
+	ob.SellTree.Root.InOrderTraverse(func(i float64) {
+		node := ob.SellTree.Root.SearchSubTree(i)
+		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
+			var b []string
+			price := new(decimal.Big).SetFloat64(i)
+			b = append(b, price.String())
+			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
+			amount := subNode.Data.(*OrderNode).Volume
+			b = append(b, amount.String())
+			sells = append(sells, b)
+		})
+	})
+
+	// res := ob.GetOrders()
+	return &BookArray{
+		Buys:  buys,
+		Sells: sells,
+	}
 }
 
 // String implements Stringer interface

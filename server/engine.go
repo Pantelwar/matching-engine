@@ -29,7 +29,7 @@ func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrp
 
 	var order engine.Order
 	// decode the message
-	// fmt.Println("Orderstring =: ", orderString)
+	fmt.Println("Orderstring =: ", orderString)
 	err := order.FromJSON([]byte(orderString))
 	if err != nil {
 		fmt.Println("JSON Parse Error =: ", err)
@@ -64,6 +64,7 @@ func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrp
 	// }
 
 	if err != nil {
+		fmt.Println("Marshal error", err)
 		return nil, err
 	}
 
@@ -167,4 +168,61 @@ func (e *Engine) ProcessMarket(ctx context.Context, req *engineGrpc.Order) (*eng
 		return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: string(partialOrderString)}, nil
 	}
 	return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: "null"}, nil
+}
+
+// FetchBook implements EngineServer interface
+func (e *Engine) FetchBook(ctx context.Context, req *engineGrpc.BookInput) (*engineGrpc.BookOutput, error) {
+	if req.GetPair() == "" {
+		fmt.Println("Invalid pair")
+		return nil, errors.New("Invalid pair")
+	}
+
+	var pairBook *engine.OrderBook
+	if val, ok := e.book[req.GetPair()]; ok {
+		pairBook = val
+	} else {
+		return nil, errors.New("Invalid pair")
+	}
+
+	fmt.Println(pairBook)
+	book := pairBook.GetOrders()
+
+	result := &engineGrpc.BookOutput{Buys: []*engineGrpc.BookArray{}, Sells: []*engineGrpc.BookArray{}}
+
+	for _, buy := range book.Buys {
+		arr := &engineGrpc.BookArray{PriceAmount: []string{}}
+
+		bodyBytes, err := json.Marshal(buy)
+		if err != nil {
+			fmt.Println("1", err)
+			return &engineGrpc.BookOutput{Buys: []*engineGrpc.BookArray{}, Sells: []*engineGrpc.BookArray{}}, nil
+		}
+
+		err = json.Unmarshal(bodyBytes, &arr.PriceAmount)
+		if err != nil {
+			fmt.Println("2", err)
+			return &engineGrpc.BookOutput{Buys: []*engineGrpc.BookArray{}, Sells: []*engineGrpc.BookArray{}}, nil
+		}
+
+		result.Buys = append(result.Buys, arr)
+	}
+
+	for _, sell := range book.Sells {
+		arr := &engineGrpc.BookArray{PriceAmount: []string{}}
+
+		bodyBytes, err := json.Marshal(sell)
+		if err != nil {
+			fmt.Println("json.Marshal Error", err)
+			return &engineGrpc.BookOutput{Buys: []*engineGrpc.BookArray{}, Sells: []*engineGrpc.BookArray{}}, nil
+		}
+
+		err = json.Unmarshal(bodyBytes, &arr.PriceAmount)
+		if err != nil {
+			fmt.Println("json.Unmarshal Error", err)
+			return &engineGrpc.BookOutput{Buys: []*engineGrpc.BookArray{}, Sells: []*engineGrpc.BookArray{}}, nil
+		}
+
+		result.Sells = append(result.Sells, arr)
+	}
+	return result, nil
 }
