@@ -71,6 +71,10 @@ func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrp
 	if partialOrder != nil {
 		var partialOrderString []byte
 		partialOrderString, err = json.Marshal(partialOrder)
+		if err != nil {
+			fmt.Println("partialOrderString Marshal error", err)
+			return nil, err
+		}
 		return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: string(partialOrderString)}, nil
 	}
 	return &engineGrpc.OutputOrders{OrdersProcessed: string(ordersProcessedString), PartialOrder: "null"}, nil

@@ -39,14 +39,10 @@ func (ob *OrderBook) commonProcessMarket(order Order, tree *binarytree.BinaryTre
 			maxNode = tree.Min()
 		}
 		if maxNode == nil || noMoreOrders {
+			if order.Amount.Cmp(decimalZero) == 1 {
+				allOrdersProcessed = append(allOrdersProcessed, NewOrder(order.ID, order.Type, orderOriginalAmount, decimalZero))
+			}
 			break
-			// if order.Amount.Cmp(decimalZero) == 1 {
-			// 	fmt.Println("adding sell node pending", noMoreOrders)
-			// 	add(order)
-			// 	break
-			// } else {
-			// 	break
-			// }
 		}
 
 		// var t []Trade
@@ -90,14 +86,15 @@ func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTre
 			maxNode = tree.Min()
 		}
 		if maxNode == nil || noMoreOrders {
-			// break
-			if order.Amount.Cmp(decimalZero) == 1 {
-				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, orderOriginalAmount, decimalZero))
-				// partialOrder = NewOrder(order.ID, order.Type, order.Amount, order.Price)
-				break
-			} else {
-				break
-			}
+			break
+			// if order.Amount.Cmp(decimalZero) == 1 {
+			// 	// fmt.Println("inserting", noMoreOrders)
+			// 	// ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, orderOriginalAmount, decimalZero))
+			// 	// partialOrder = NewOrder(order.ID, order.Type, order.Amount, order.Price)
+			// 	break
+			// } else {
+			// 	break
+			// }
 		}
 		// if order.Type == Sell {
 		// 	if orderPrice > maxNode.Key {
