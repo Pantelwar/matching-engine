@@ -102,8 +102,8 @@ func (ob *OrderBook) GetOrders() *BookArray {
 		node := ob.BuyTree.Root.SearchSubTree(i)
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
 			var b []string
-			price := new(decimal.Big).SetFloat64(i)
-			b = append(b, price.String())
+			price := strconv.FormatFloat(i, 'f', -1, 64)
+			b = append(b, price)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			amount := subNode.Data.(*OrderNode).Volume
 			b = append(b, amount.String())
@@ -116,8 +116,8 @@ func (ob *OrderBook) GetOrders() *BookArray {
 		node := ob.SellTree.Root.SearchSubTree(i)
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
 			var b []string
-			price := new(decimal.Big).SetFloat64(i)
-			b = append(b, price.String())
+			price := strconv.FormatFloat(i, 'f', -1, 64)
+			b = append(b, price)
 			subNode := node.Data.(*OrderType).Tree.Root.SearchSubTree(i)
 			amount := subNode.Data.(*OrderNode).Volume
 			b = append(b, amount.String())
