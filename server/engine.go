@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"matching-engine/engine"
-	engineGrpc "matching-engine/engineGrpc"
+	"github.com/Pantelwar/matching-engine/engine"
+	engineGrpc "github.com/Pantelwar/matching-engine/engineGrpc"
 
 	"github.com/ericlagergren/decimal"
 )

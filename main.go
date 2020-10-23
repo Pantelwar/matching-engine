@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	engineGrpc "matching-engine/engineGrpc"
-	"matching-engine/server"
 	"net"
 	"os"
+
+	engineGrpc "github.com/Pantelwar/matching-engine/engineGrpc"
+	"github.com/Pantelwar/matching-engine/server"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
