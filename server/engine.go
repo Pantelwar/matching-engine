@@ -189,7 +189,7 @@ func (e *Engine) FetchBook(ctx context.Context, req *engineGrpc.BookInput) (*eng
 	}
 
 	fmt.Println(pairBook)
-	book := pairBook.GetOrders()
+	book := pairBook.GetOrders(req.GetLimit())
 
 	result := &engineGrpc.BookOutput{Buys: []*engineGrpc.BookArray{}, Sells: []*engineGrpc.BookArray{}}
 

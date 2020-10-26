@@ -96,11 +96,14 @@ type BookArray struct {
 }
 
 // GetOrders implements json.Marshaler interface
-func (ob *OrderBook) GetOrders() *BookArray {
+func (ob *OrderBook) GetOrders(limit int64) *BookArray {
 	buys := [][]string{}
-	ob.BuyTree.Root.InOrderTraverse(func(i float64) {
+	ob.BuyTree.Root.InReverseOrderTraverse(func(i float64) {
 		node := ob.BuyTree.Root.SearchSubTree(i)
-		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
+		node.Data.(*OrderType).Tree.Root.InReverseOrderTraverse(func(i float64) {
+			if int64(len(buys)) >= limit && limit != 0 {
+				return
+			}
 			var b []string
 			price := strconv.FormatFloat(i, 'f', -1, 64)
 			b = append(b, price)
@@ -115,6 +118,9 @@ func (ob *OrderBook) GetOrders() *BookArray {
 	ob.SellTree.Root.InOrderTraverse(func(i float64) {
 		node := ob.SellTree.Root.SearchSubTree(i)
 		node.Data.(*OrderType).Tree.Root.InOrderTraverse(func(i float64) {
+			if int64(len(sells)) >= limit && limit != 0 {
+				return
+			}
 			var b []string
 			price := strconv.FormatFloat(i, 'f', -1, 64)
 			b = append(b, price)

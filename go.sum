@@ -1,7 +1,9 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Pantelwar/binarytree v0.0.0-20200522122156-d2c508496077 h1:u+tVwya7N7gP9tvCqBiNQNU87BtcukyD1vdSK+0l060=
-github.com/Pantelwar/binarytree v0.0.0-20200522122156-d2c508496077/go.mod h1:/NCD1RUdwk0zIggyYp8iXo7QaNu8tyZGSTBjJn86V+E=
+github.com/Pantelwar/binarytree v0.0.0-20201026130539-0b07cba90443 h1:pvkzBGZj0ckWgA7FseIP2EvvMpmwThE8+N5fACy+uik=
+github.com/Pantelwar/binarytree v0.0.0-20201026130539-0b07cba90443/go.mod h1:/NCD1RUdwk0zIggyYp8iXo7QaNu8tyZGSTBjJn86V+E=
+github.com/Pantelwar/binarytree v0.0.0-20201026132145-70b173254e74 h1:gni/+Rw8DU1jzpGflD4g4k8idW3/FHBoIyJRXR7PgZw=
+github.com/Pantelwar/binarytree v0.0.0-20201026132145-70b173254e74/go.mod h1:/NCD1RUdwk0zIggyYp8iXo7QaNu8tyZGSTBjJn86V+E=
 github.com/apmckinlay/gsuneido v0.0.0-20190404155041-0b6cd442a18f/go.mod h1:JU2DOj5Fc6rol0yaT79Csr47QR0vONGwJtBNGRD7jmc=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
@@ -52,7 +54,6 @@ golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJ
 golang.org/x/sys v0.0.0-20180830151530-49385e6e1522/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a h1:1BGLXjeY4akVXGgbC9HugT3Jv3hCI0z56oJR5vAMgBU=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
-golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
