@@ -143,6 +143,35 @@ func TestProcessLimitOrder(t *testing.T) {
 			},
 			NewOrder("b2", Buy, DecimalBig("1.0"), DecimalBig("8000.0")),
 		},
+		{
+			[]*Order{
+				NewOrder("b1", Buy, DecimalBig("10.0"), DecimalBig("74.0")),
+				NewOrder("b2", Buy, DecimalBig("10.0"), DecimalBig("75.0")),
+				NewOrder("b4", Buy, DecimalBig("10.0"), DecimalBig("770.0")),
+				NewOrder("b3", Buy, DecimalBig("10.0"), DecimalBig("760.0")),
+			},
+			NewOrder("s1", Sell, DecimalBig("21.0"), DecimalBig("770.0")),
+			[]*Order{
+				NewOrder("b4", Buy, DecimalBig("10.0"), DecimalBig("770.0")),
+			},
+			// nil,
+			NewOrder("s1", Sell, DecimalBig("11.0"), DecimalBig("770.0")),
+		},
+
+		{
+			[]*Order{
+				// NewOrder("b1", Buy, DecimalBig("10.0"), DecimalBig("74.0")),
+				// NewOrder("b2", Buy, DecimalBig("10.0"), DecimalBig("75.0")),
+				NewOrder("s3", Sell, DecimalBig("10.0"), DecimalBig("760.0")),
+				NewOrder("s4", Sell, DecimalBig("10.0"), DecimalBig("770.0")),
+			},
+			NewOrder("b1", Buy, DecimalBig("20.0"), DecimalBig("760.0")),
+			[]*Order{
+				NewOrder("s3", Sell, DecimalBig("10.0"), DecimalBig("760.0")),
+			},
+			// nil,
+			NewOrder("b1", Buy, DecimalBig("10.0"), DecimalBig("760.0")),
+		},
 
 		////////////////////////////////////////////////////////////////////////
 
@@ -156,8 +185,10 @@ func TestProcessLimitOrder(t *testing.T) {
 			ob.Process(*o)
 		}
 
+		fmt.Println("before:", ob)
 		processedOrder, partialOrder := ob.Process(*tt.input)
 		fmt.Println("result ", i, processedOrder, partialOrder)
+		fmt.Println("after:", ob)
 		for i, po := range processedOrder {
 			if po.String() != tt.processedOrder[i].String() {
 				fmt.Println(*po, *tt.processedOrder[i], *po == *tt.processedOrder[i])
