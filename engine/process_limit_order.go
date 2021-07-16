@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/Pantelwar/binarytree"
 	"github.com/ericlagergren/decimal"
 )
@@ -55,7 +57,9 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 
 		// var t []Trade
 		var ordersProcessed []*Order
-		noMoreOrders, ordersProcessed, partialOrder = ob.processLimit(&order, maxNode.Data.(*OrderType).Tree, orderOriginalAmount) //, orderPrice)
+		noMoreOrders, ordersProcessed, partialOrder = ob.processLimit(&order, partialOrder, maxNode.Data.(*OrderType).Tree, orderOriginalAmount) //, orderPrice)
+		fmt.Printf("\npartialOrder in between: %#v\n", partialOrder)
+		fmt.Printf("noMoreOrders: %#v\n\n", noMoreOrders)
 		allOrdersProcessed = append(allOrdersProcessed, ordersProcessed...)
 		// trades = append(trades, t...)
 
@@ -69,10 +73,15 @@ func (ob *OrderBook) commonProcess(order Order, tree *binarytree.BinaryTree, add
 	}
 
 	// return trades, allOrdersProcessed, partialOrder
+	// if partialOrder.Amount == nil {
+	// 	partialOrder = nil
+	// }
+	fmt.Printf("partialOrder final: %#v\n", partialOrder)
+
 	return allOrdersProcessed, partialOrder
 }
 
-func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree, orderOriginalAmount *decimal.Big) (bool, []*Order, *Order) {
+func (ob *OrderBook) processLimit(order, partialOrder *Order, tree *binarytree.BinaryTree, orderOriginalAmount *decimal.Big) (bool, []*Order, *Order) {
 	orderPrice, _ := order.Price.Float64()
 	var maxNode *binarytree.BinaryNode
 	if order.Type == Sell {
@@ -82,7 +91,10 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree, ord
 	}
 	noMoreOrders := false
 	var ordersProcessed []*Order
-	var partialOrder *Order
+	// var partialOrder *Order
+	fmt.Printf("partialOrder start: %#v\n", partialOrder)
+
+	// var partialOrder *Order
 	if maxNode == nil {
 		// return trades, noMoreOrders, nil, nil
 		return noMoreOrders, nil, nil
@@ -100,19 +112,20 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree, ord
 				partialOrder = NewOrder(order.ID, order.Type, order.Amount, order.Price)
 				break
 			} else {
+				// partialOrder = nil
 				break
 			}
 		}
 		if order.Type == Sell {
 			if orderPrice > maxNode.Key {
-				// fmt.Println("adding sellnode directly")
+				fmt.Println("adding sellnode directly")
 				noMoreOrders = true
 				// return trades, noMoreOrders, nil, nil
 				return noMoreOrders, ordersProcessed, partialOrder
 			}
 		} else {
 			if orderPrice < maxNode.Key {
-				// fmt.Println("adding buynode directly")
+				fmt.Println("adding buynode directly")
 				noMoreOrders = true
 				// return trades, noMoreOrders, nil, nil
 				return noMoreOrders, ordersProcessed, partialOrder
@@ -159,7 +172,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree, ord
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, orderOriginalAmount, order.Price))
-
+				partialOrder = nil
 				countMatch++
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
@@ -202,5 +215,7 @@ func (ob *OrderBook) processLimit(order *Order, tree *binarytree.BinaryTree, ord
 		maxNode.SetData(nodeData)
 	}
 	// return trades, noMoreOrders, ordersProcessed, partialOrder
+	// fmt.Printf("partialOrder: %#v\n", partialOrder)
+	// fmt.Printf("order.Amount: %#v\n", order.Amount.String())
 	return noMoreOrders, ordersProcessed, partialOrder
 }
