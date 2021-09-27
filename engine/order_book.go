@@ -206,7 +206,7 @@ func NewOrderBook() *OrderBook {
 	return &OrderBook{
 		BuyTree:         bTree,
 		SellTree:        sTree,
-		orderLimitRange: 100,
+		orderLimitRange: 200000000,
 		orders:          make(map[string]*OrderNode),
 		mutex:           &sync.Mutex{},
 	}
