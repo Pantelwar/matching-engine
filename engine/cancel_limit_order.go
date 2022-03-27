@@ -2,7 +2,9 @@ package engine
 
 // CancelOrder remove the order from book and returns
 func (ob *OrderBook) CancelOrder(id string) *Order {
+	ob.mutex.Lock()
 	orderNode := ob.orders[id]
+	ob.mutex.Unlock()
 
 	if orderNode == nil {
 		return nil
