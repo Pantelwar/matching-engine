@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// var decimalZero, _ = new(decimal.Big).SetString("0.0")
+// var decimalZero, _ = util.NewDecimalFromString("0.0")
 
 func TestProcessMarketOrder(t *testing.T) {
 	var tests = []struct {

@@ -2,7 +2,7 @@ package engine
 
 import (
 	"github.com/Pantelwar/binarytree"
-	"github.com/ericlagergren/decimal"
+	"github.com/Pantelwar/matching-engine/util"
 )
 
 // ProcessMarket executes limit process
@@ -63,7 +63,7 @@ func (ob *OrderBook) commonProcessMarket(order Order, tree *binarytree.BinaryTre
 	return allOrdersProcessed, partialOrder
 }
 
-func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTree, orderOriginalAmount *decimal.Big) (bool, []*Order, *Order) {
+func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTree, orderOriginalAmount *util.StandardBigDecimal) (bool, []*Order, *Order) {
 	// orderPrice, _ := order.Price.Float64()
 	var maxNode *binarytree.BinaryNode
 	if order.Type == Sell {
@@ -131,10 +131,10 @@ func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTre
 			// countAdd += ele.Amount
 			// fmt.Println(ele.Price, ele.Amount, order.Amount, ele.Amount.Cmp(order.Amount))
 			if ele.Amount.Cmp(order.Amount) == 1 {
-				nodeData.updateVolume(new(decimal.Big).Neg(order.Amount))
+				nodeData.updateVolume(order.Amount.Neg())
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
-				amount := ele.Amount.Sub(ele.Amount, order.Amount)
+				amount := ele.Amount.Sub(order.Amount)
 				// amount = math.Floor(amount*100000000) / 100000000
 				ele.Amount = amount
 
@@ -143,12 +143,12 @@ func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTre
 
 				maxNode.SetData(nodeData)
 
-				order.Amount, _ = new(decimal.Big).SetString("0.0")
+				order.Amount, _ = util.NewDecimalFromString("0.0")
 				noMoreOrders = true
 				break
 			}
 			if ele.Amount.Cmp(order.Amount) == 0 {
-				nodeData.updateVolume(new(decimal.Big).Neg(order.Amount))
+				nodeData.updateVolume(order.Amount.Neg())
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 				ordersProcessed = append(ordersProcessed, NewOrder(order.ID, order.Type, orderOriginalAmount, decimalZero))
@@ -156,7 +156,7 @@ func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTre
 				countMatch++
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: order.Amount, Price: ele.Price})
 
-				order.Amount, _ = new(decimal.Big).SetString("0.0")
+				order.Amount, _ = util.NewDecimalFromString("0.0")
 				// orderComplete = true
 
 				// ele.Amount = 0
@@ -170,11 +170,11 @@ func (ob *OrderBook) processLimitMarket(order *Order, tree *binarytree.BinaryTre
 
 				ordersProcessed = append(ordersProcessed, NewOrder(ele.ID, ele.Type, ele.Amount, ele.Price))
 
-				nodeData.updateVolume(new(decimal.Big).Neg(ele.Amount))
+				nodeData.updateVolume(ele.Amount.Neg())
 
 				// trades = append(trades, Trade{BuyOrderID: ele.ID, SellOrderID: order.ID, Amount: ele.Amount, Price: ele.Price})
 
-				order.Amount = new(decimal.Big).Sub(order.Amount, ele.Amount)
+				order.Amount = order.Amount.Sub(ele.Amount)
 				ob.mutex.Lock()
 				delete(ob.orders, ele.ID)
 				ob.mutex.Unlock()

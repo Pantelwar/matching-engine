@@ -6,27 +6,26 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ericlagergren/decimal"
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/Pantelwar/matching-engine/util"
 )
 
 // Order describes the struct of the order
 type Order struct {
-	Amount *decimal.Big `json:"amount"` // validate:"gt=0"`
-	Price  *decimal.Big `json:"price"`  // validate:"gt=0"`
-	ID     string       `json:"id"`     // validate:"required"`
-	Type   Side         `json:"type"`   //  validate:"side_validate"`
+	Amount *util.StandardBigDecimal `json:"amount"` // validate:"gt=0"`
+	Price  *util.StandardBigDecimal `json:"price"`  // validate:"gt=0"`
+	ID     string                   `json:"id"`     // validate:"required"`
+	Type   Side                     `json:"type"`   //  validate:"side_validate"`
 }
 
-func sideValidation(fl validator.FieldLevel) bool {
-	if fl.Field().Interface() != Buy && fl.Field().Interface() != Sell {
-		return false
-	}
-	return true
-}
+// func sideValidation(fl validator.FieldLevel) bool {
+// 	if fl.Field().Interface() != Buy && fl.Field().Interface() != Sell {
+// 		return false
+// 	}
+// 	return true
+// }
 
 // NewOrder returns *Order
-func NewOrder(id string, orderType Side, amount, price *decimal.Big) *Order {
+func NewOrder(id string, orderType Side, amount, price *util.StandardBigDecimal) *Order {
 	o := &Order{ID: id, Type: orderType, Amount: amount, Price: price}
 	return o
 }
@@ -48,8 +47,8 @@ func (order *Order) ToJSON() ([]byte, error) {
 
 // String implements Stringer interface
 func (order *Order) String() string {
-	amount, _ := order.Amount.Float64()
-	price, _ := order.Price.Float64()
+	amount := order.Amount.Float64()
+	price := order.Price.Float64()
 
 	return fmt.Sprintf("\"%s\":\n\tside: %v\n\tquantity: %s\n\tprice: %s\n", order.ID, order.Type, strconv.FormatFloat(amount, 'f', -1, 64), strconv.FormatFloat(price, 'f', -1, 64))
 }
@@ -72,28 +71,28 @@ func (order *Order) UnmarshalJSON(data []byte) error {
 		return errors.New("ID is not present")
 	}
 	if obj.Type == "" {
-		return errors.New("Invalid order type")
+		return errors.New("invalid order type")
 	}
 
-	var ok bool
-	order.Price, ok = new(decimal.Big).SetString(obj.Price) //.Quantize(8)
-	if !ok {
-		fmt.Println("price", order.Price, ok)
-		return errors.New("Invalid order price")
+	var err error
+	order.Price, err = util.NewDecimalFromString(obj.Price) //.Quantize(8)
+	if err != nil {
+		fmt.Println("price", order.Price, err.Error())
+		return errors.New("invalid order price")
 	}
-	order.Amount, ok = new(decimal.Big).SetString(obj.Amount) //.Quantize(8)
-	if !ok {
-		return errors.New("Invalid order amount")
+	order.Amount, err = util.NewDecimalFromString(obj.Amount) //.Quantize(8)
+	if err != nil {
+		return errors.New("invalid order amount")
 	}
 
 	order.Type = obj.Type
 	order.ID = obj.ID
 
-	price, _ := order.Price.Float64()
+	price := order.Price.Float64()
 	if price <= 0 {
 		return errors.New("Order price should be greater than zero")
 	}
-	amount, _ := order.Amount.Float64()
+	amount := order.Amount.Float64()
 	if amount <= 0 {
 		return errors.New("Order amount should be greater than zero")
 	}

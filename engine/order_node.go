@@ -1,18 +1,18 @@
 package engine
 
 import (
-	"github.com/ericlagergren/decimal"
+	"github.com/Pantelwar/matching-engine/util"
 )
 
 // OrderNode ...
 type OrderNode struct {
-	Orders []*Order     `json:"orders"`
-	Volume *decimal.Big `json:"volume"`
+	Orders []*Order                 `json:"orders"`
+	Volume *util.StandardBigDecimal `json:"volume"`
 }
 
 // NewOrderNode returns new OrderNode struct
 func NewOrderNode() *OrderNode {
-	vol, _ := new(decimal.Big).SetString("0.0")
+	vol, _ := util.NewDecimalFromString("0.0")
 	return &OrderNode{Orders: []*Order{}, Volume: vol}
 }
 
@@ -22,7 +22,7 @@ func (on *OrderNode) addOrder(order Order) {
 	for _, o := range on.Orders {
 		if o.ID == order.ID {
 			if o.Amount != order.Amount {
-				on.updateVolume(new(decimal.Big).Neg(o.Amount))
+				on.updateVolume(o.Amount.Neg())
 				o.Amount = order.Amount
 				o.Price = order.Price
 				on.updateVolume(o.Amount)
@@ -39,14 +39,14 @@ func (on *OrderNode) addOrder(order Order) {
 }
 
 // updateVolume updates volume
-func (on *OrderNode) updateVolume(value *decimal.Big) {
-	on.Volume = new(decimal.Big).Add(on.Volume, value)
+func (on *OrderNode) updateVolume(value *util.StandardBigDecimal) {
+	on.Volume = on.Volume.Add(value)
 	// fmt.Println("onVolume", on.Volume)
 }
 
 // removeOrder removes order from OrderNode array
 func (on *OrderNode) removeOrder(index int) {
-	on.updateVolume(new(decimal.Big).Neg(on.Orders[index].Amount))
+	on.updateVolume(on.Orders[index].Amount.Neg())
 	on.Orders = append(on.Orders[:index], on.Orders[index+1:]...)
 }
 

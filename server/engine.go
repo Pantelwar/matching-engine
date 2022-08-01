@@ -8,8 +8,7 @@ import (
 
 	"github.com/Pantelwar/matching-engine/engine"
 	engineGrpc "github.com/Pantelwar/matching-engine/engineGrpc"
-
-	"github.com/ericlagergren/decimal"
+	"github.com/Pantelwar/matching-engine/util"
 )
 
 // Engine ...
@@ -24,7 +23,7 @@ func NewEngine() *Engine {
 
 // Process implements EngineServer interface
 func (e *Engine) Process(ctx context.Context, req *engineGrpc.Order) (*engineGrpc.OutputOrders, error) {
-	bigZero, _ := new(decimal.Big).SetString("0.0")
+	bigZero, _ := util.NewDecimalFromString("0.0")
 	orderString := fmt.Sprintf("{\"id\":\"%s\", \"type\": \"%s\", \"amount\": \"%s\", \"price\": \"%s\" }", req.GetID(), req.GetType(), req.GetAmount(), req.GetPrice())
 
 	var order engine.Order
@@ -123,7 +122,7 @@ func (e *Engine) Cancel(ctx context.Context, req *engineGrpc.Order) (*engineGrpc
 
 // ProcessMarket implements EngineServer interface
 func (e *Engine) ProcessMarket(ctx context.Context, req *engineGrpc.Order) (*engineGrpc.OutputOrders, error) {
-	bigZero, _ := new(decimal.Big).SetString("0.0")
+	bigZero, _ := util.NewDecimalFromString("0.0")
 	orderString := fmt.Sprintf("{\"id\":\"%s\", \"type\": \"%s\", \"amount\": \"%s\", \"price\": \"%s\" }", req.GetID(), req.GetType(), req.GetAmount(), req.GetPrice())
 
 	var order engine.Order

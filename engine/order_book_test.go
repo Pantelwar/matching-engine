@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/Pantelwar/binarytree"
-	"github.com/ericlagergren/decimal"
+	"github.com/Pantelwar/matching-engine/util"
 )
 
 func TestNewOrderBook(t *testing.T) {
 	t.Log(NewOrderBook())
 }
 
-func DecimalBig(val string) *decimal.Big {
-	a, _ := new(decimal.Big).SetString(val)
+func DecimalBig(val string) *util.StandardBigDecimal {
+	a, _ := util.NewDecimalFromString(val)
 	return a
 }
 
@@ -40,7 +40,7 @@ func TestAddOrderInBook(t *testing.T) {
 			t.Fatal("Order should be pushed in orders array")
 		}
 
-		price, _ := tt.input.Price.Float64()
+		price := tt.input.Price.Float64()
 		startPoint := float64(int(math.Ceil(price)) / ob.orderLimitRange * ob.orderLimitRange)
 		endPoint := startPoint + float64(ob.orderLimitRange)
 		searchNodePrice := (startPoint + endPoint) / 2
@@ -77,7 +77,7 @@ func TestRemoveOrderNodeFromBook(t *testing.T) {
 		}
 	}
 
-	price, _ := tests[0].input.Price.Float64()
+	price := tests[0].input.Price.Float64()
 	startPoint := float64(int(math.Ceil(price)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint := startPoint + float64(ob.orderLimitRange)
 	searchNodePrice := (startPoint + endPoint) / 2
@@ -91,7 +91,7 @@ func TestRemoveOrderNodeFromBook(t *testing.T) {
 		t.Fatal("Buy Mid Price should be get removed from tree")
 	}
 
-	price, _ = tests[1].input.Price.Float64()
+	price = tests[1].input.Price.Float64()
 	startPoint = float64(int(math.Ceil(price)) / ob.orderLimitRange * ob.orderLimitRange)
 	endPoint = startPoint + float64(ob.orderLimitRange)
 	searchNodePrice = (startPoint + endPoint) / 2

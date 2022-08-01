@@ -37,7 +37,7 @@ func TestAddOrderInQueue(t *testing.T) {
 		}
 	}
 
-	price, _ := tests[1].input.Price.Float64()
+	price := tests[1].input.Price.Float64()
 	node := ot.Tree.Root.SearchSubTree(price)
 	if node == nil {
 		t.Fatal("There should exists a node in orderType.Tree")

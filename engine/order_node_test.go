@@ -21,7 +21,7 @@ func TestAddOrderInNode(t *testing.T) {
 	volume := DecimalBig("0.0")
 	for _, tt := range tests {
 		on.addOrder(*tt.input)
-		volume = volume.Add(volume, tt.input.Amount)
+		volume = volume.Add(tt.input.Amount)
 	}
 
 	if len(on.Orders) != len(tests) {
@@ -46,11 +46,11 @@ func TestRemoveOrderFromNode(t *testing.T) {
 	volume := DecimalBig("0.0")
 	for _, tt := range tests {
 		on.addOrder(*tt.input)
-		volume = volume.Add(volume, tt.input.Amount)
+		volume = volume.Add(tt.input.Amount)
 	}
 
 	on.removeOrder(0)
-	volume = volume.Sub(volume, tests[0].input.Amount)
+	volume = volume.Sub(tests[0].input.Amount)
 
 	if len(on.Orders) != len(tests)-1 {
 		t.Fatalf("Invalid order length (have: %d, want: %d", len(on.Orders), len(tests))
@@ -74,7 +74,7 @@ func TestUpdateVolume(t *testing.T) {
 	volume := DecimalBig("0.0")
 	for _, tt := range tests {
 		on.updateVolume(tt.input.Amount)
-		volume = volume.Add(volume, tt.input.Amount)
+		volume = volume.Add(tt.input.Amount)
 	}
 
 	if on.Volume.Cmp(volume) != 0 {

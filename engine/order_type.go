@@ -22,12 +22,12 @@ func NewOrderType(orderSide Side) *OrderType {
 // AddOrderInQueue adds order to the tree
 func (ot *OrderType) AddOrderInQueue(order Order) (*OrderNode, error) {
 	if ot.Type != order.Type {
-		return nil, errors.New("Invalid order type")
+		return nil, errors.New("invalid order type")
 	}
 	orderNode := NewOrderNode()
 	orderNode.Orders = append(orderNode.Orders, &order)
 	orderNode.Volume = order.Amount
-	orderPrice, _ := order.Price.Float64()
+	orderPrice := order.Price.Float64()
 	ot.Tree.Insert(orderPrice, orderNode)
 	return orderNode, nil
 }
